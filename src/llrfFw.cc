@@ -362,32 +362,21 @@ void CllrfFwAdapt::setAverageWindow(double *window)
 
 void CllrfFwAdapt::getIWaveform(double *i_waveform, int channel)
 {
-    uint32_t waveform[MAX_SAMPLES];
-    CPSW_TRY_CATCH(i_waveform_ch_[channel]->getVal(waveform, MAX_SAMPLES));
+    int16_t waveform[MAX_SAMPLES];
+    CPSW_TRY_CATCH(i_waveform_ch_[channel]->getVal((uint16_t*)waveform, MAX_SAMPLES));
 
     for(int i = 0; i < MAX_SAMPLES; i++) {
-        if(waveform[i] & (0x1 << 18)) {    // handle negative value for ap_fixed<18,1>
-            *(i_waveform + i) = (int32_t)(waveform[i] | ~(0x0001ffff));
-        } else {
-            *(i_waveform + i) = waveform[i];
-        }
-
-        *(i_waveform + i) /= (double)(0x0001ffff);
+        *(i_waveform + i) = (double)(waveform[i])/(double)(0x7fff);
     }
 }
 
 void CllrfFwAdapt::getQWaveform(double *q_waveform, int channel)
 {
-    uint32_t waveform[MAX_SAMPLES];
-    CPSW_TRY_CATCH(q_waveform_ch_[channel]->getVal(waveform, MAX_SAMPLES));
+    int16_t waveform[MAX_SAMPLES];
+    CPSW_TRY_CATCH(q_waveform_ch_[channel]->getVal((uint16_t*)waveform, MAX_SAMPLES));
+
 
     for(int i = 0; i < MAX_SAMPLES; i++) {
-        if(waveform[i] & (0x1 << 18)) {    // handle negative value for ap_fixed<18,1>
-            *(q_waveform + i) = (int32_t) (waveform[i] | ~(0x0001ffff));
-        } else {
-            *(q_waveform + i) = waveform[i];
-        }
-
-        *(q_waveform +i) /= (double) (0x0001ffff);
+        *(q_waveform +i) = (double)(waveform[i])/(double) (0x7fff);
     }
 }
