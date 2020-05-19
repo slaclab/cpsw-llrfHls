@@ -40,7 +40,7 @@ public:
     virtual void getAmplAllChannels(double *ampl) = 0;
     virtual void getFeedbackPhaseAllTimeslots(double *phase) = 0;
     virtual void getFeedbackAmplAllTimeslots(double *ampl) = 0;
-    virtual void gerReferencePhaseAllTimeslots(double *phase) = 0;
+    virtual void getReferencePhaseAllTimeslots(double *phase) = 0;
     virtual void getReferenceAmplAllTimeslots(double *ampl) = 0;
     virtual void getPhaseSetAllTimeslots(double *phase) = 0;
     virtual void getAmplSetAllTimeslots(double *ampl) = 0;
