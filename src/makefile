@@ -11,16 +11,16 @@ INSTALL_DIR=../
 
 HEADERS += llrfFw.h
 
-llrf_SRCS  = llrfFw.cc
-llrf_LIBS  = $(CPSW_LIBS)
+llrfHls_SRCS  = llrfFw.cc
+llrfHls_LIBS  = $(CPSW_LIBS)
 
-SHARED_LIBRARIES_YES+=llrf
-STATIC_LIBRARIES_YES+=llrf
+SHARED_LIBRARIES_YES+=llrfHls
+STATIC_LIBRARIES_YES+=llrfHls
 
-llrf_tst_SRCS = llrfFw_tst.cc
-llrf_tst_LIBS = llrf
-llrf_tst_LIBS += $(CPSW_LIBS)
+llrfHls_tst_SRCS = llrfFw_tst.cc
+llrfHls_tst_LIBS = llrfHls
+llrfHls_tst_LIBS += $(CPSW_LIBS)
 
-PROGRAMS=llrf_tst
+PROGRAMS=llrfHls_tst
 
 include $(CPSW_DIR)/rules.mak
