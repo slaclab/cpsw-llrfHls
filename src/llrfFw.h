@@ -21,7 +21,7 @@ public:
     virtual void setPhaseFeedbackOffset(double phase) = 0;
     virtual void setPhaseGain(double gain) = 0;
     virtual void setAmplGain(double gain) = 0;
-    virtual void setReferenceSubtractEnable(bool enable) = 0;
+    virtual void setReferenceSubtractionEnable(bool enable) = 0;
     virtual void setPhaseFeedbackEnable(bool enable) = 0;
     virtual void setAmplFeedbackEnable(bool enable) = 0;
     virtual void setPhaseCorrectionUpperLimit(double limit) = 0;
@@ -29,7 +29,7 @@ public:
     virtual void setAmplCorrectionUpperLimit(double limit) = 0;
     virtual void setAmplCorrectionLowerLimit(double limit) = 0;
     virtual void setAmplDriveUpperLimit(double limit) = 0;
-    virtual void setAmplDriveLowerLImit(double limit) = 0;
+    virtual void setAmplDriveLowerLimit(double limit) = 0;
     virtual void setReferenceChannelWeight(double weight, int channel) = 0;
     virtual void setFeedbackChannelWeight(double weightt, int channel) = 0;
     virtual void setPhaseOffset(double offset, int channel) = 0;
