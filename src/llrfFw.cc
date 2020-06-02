@@ -69,8 +69,8 @@ protected:
     DoubleVal_RO a_set_;                  // ampliktude set value for each timeslot, array[18]
 
     ScalVal   avg_window_;                // average window
-    ScalVal   i_waveform_ch_[NUM_CH];     // i waveform for each channel
-    ScalVal   q_waveform_ch_[NUM_CH];     // q waveform for each channel 
+    ScalVal_RO   i_waveform_ch_[NUM_CH];     // i waveform for each channel
+    ScalVal_RO   q_waveform_ch_[NUM_CH];     // q waveform for each channel 
 
 public:
     CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie);
@@ -121,7 +121,7 @@ llrfFw IllrfFw::create(Path p)
 
 CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie):
     IEntryAdapt(k, p, ie),
-    pLlrfFeedbackWrapper_(p->findByName("AppTop/AppCore/LlrfFeedbackWrapper")),
+    pLlrfFeedbackWrapper_(p->findByName("")),
     pLlrfHls_(       pLlrfFeedbackWrapper_->findByName("LlrfHls")),
     pFeedbackWindow_(pLlrfFeedbackWrapper_->findByName("FeedbackWindow")),
     pIQWaveform_(    pLlrfFeedbackWrapper_->findByName("IQWaveform")),
@@ -141,8 +141,8 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     a_corr_lower_(          IDoubleVal::create(pLlrfHls_->findByName("A_CORR_LOWER"))),
     a_drv_upper_(           IDoubleVal::create(pLlrfHls_->findByName("A_DRV_UPPER"))),
     a_drv_lower_(           IDoubleVal::create(pLlrfHls_->findByName("A_DRV_LOWER"))),
-    ref_weight_(            IDoubleVal::create(pLlrfHls_->findByName("REF_WEIGHT"))),  
-    fb_weight_ (            IDoubleVal::create(pLlrfHls_->findByName("FB_WEIGHT"))),
+    ref_weight_(            IDoubleVal::create(pLlrfHls_->findByName("REF_WEIGHT_IN"))),  
+    fb_weight_ (            IDoubleVal::create(pLlrfHls_->findByName("FB_WEIGHT_IN"))),
     // p_offset_     // make multiple instances in function body, 10 instances
     // p_des_        // make multiple instances in function body, 18 instances
     // a_des_        // make multiple instances in function body, 18 instances
@@ -164,8 +164,8 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
 
     for(int i = 0; i < NUM_CH; i++) {
         sprintf(str_name, "P_OFFSET[%d]",   i);           p_offset_[i]      = IDoubleVal::create(pLlrfHls_->findByName(str_name));
-        sprintf(str_name, "IQWaveform[%d]/waveformI", i); i_waveform_ch_[i] = IScalVal::create(pLlrfHls_->findByName(str_name));
-        sprintf(str_name, "IQWaveform[%d]/waveformQ", i); q_waveform_ch_[i] = IScalVal::create(pLlrfHls_->findByName(str_name));
+        sprintf(str_name, "IQWaveform[%d]/waveformI", i); i_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
+        sprintf(str_name, "IQWaveform[%d]/waveformQ", i); q_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
 
         ref_weight_input[i] = ref_weight_norm[i] = 0.;    // intitialize the referecne channel weight
         fb_weight_input[i]  = fb_weight_norm[i]  = 0.;    // iniitialize the feeedback channel weight
