@@ -112,6 +112,13 @@ public:
 
 };
 
+
+llrfFw IllrfFw::create(Path p)
+{
+    return IEntryAdapt::check_interface<llrfFwAdapt, DevImpl>(p);
+}
+
+
 CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie):
     IEntryAdapt(k, p, ie),
     pLlrfFeedbackWrapper_(p->findByName("AppTop/AppCore/LlrfFeedbackWrapper")),

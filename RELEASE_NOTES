@@ -1,3 +1,5 @@
+R0.0.0    June 2, 2020   Kukhee Kim (khkim)
+                 force tag: add  a missing method (llrfFw::create())
 
 R0.0.0     May 17, 2020   Kukhee Kim (khkim)
                  Initial Release for LLRF(HLS) firmware API layer
