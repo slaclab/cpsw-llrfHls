@@ -1,3 +1,8 @@
+R1.0.0    June 4, 2020   Kukhee Kim (khkim)
+                 - first working version release
+                 - buf fixing
+                 - add normalization for the average window
+
 R0.0.0    June 2, 2020   Kukhee Kim (khkim)
                  force tag: add  a missing method (llrfFw::create())
 
