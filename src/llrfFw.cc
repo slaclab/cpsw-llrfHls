@@ -253,13 +253,16 @@ void CllrfFwAdapt::setAmplDriveLowerLimit(double limit)
 void CllrfFwAdapt::setReferenceChannelWeight(double weight, int channel)
 {
     double sum = 0.;
+
+    ref_weight_input[channel] = weight;
+
     for(int i = 0; i < NUM_CH; i++) {
         sum += ref_weight_input[i];
     }
     if(sum <0.) return;
 
     for(int i = 0; i < NUM_CH; i++) {
-        ref_weight_norm[i] /= sum;
+        ref_weight_norm[i] = ref_weight_input[i] / sum;
     }
 
     CPSW_TRY_CATCH(ref_weight_->setVal(ref_weight_norm, NUM_CH));
@@ -268,13 +271,16 @@ void CllrfFwAdapt::setReferenceChannelWeight(double weight, int channel)
 void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel)
 {
     double sum = 0.;
+
+    fb_weight_input[channel] = weight;
+
     for(int i = 0; i < NUM_CH; i++) {
         sum += fb_weight_input[i];
     }
     if(sum < 0.) return;
 
     for(int i = 0; i < NUM_CH; i++) {
-        fb_weight_norm[i] /= sum;
+        fb_weight_norm[i] = fb_weight_input[i] / sum;
     }
 
     CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_CH));
