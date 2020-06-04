@@ -368,6 +368,8 @@ void CllrfFwAdapt::setAverageWindow(double *window)
  
     for(int i = 0; i < MAX_SAMPLES; i++) sum += *(window + i);
 
+    if(sum == 0.) return;
+
     for(int i = 0; i < MAX_SAMPLES; i++) {
         window_out[i] = (int16_t)((*(window + i) / sum) * 0x7fff);
     }
