@@ -363,10 +363,13 @@ void CllrfFwAdapt::getAmplSetAllTimeslots(double *ampl)
 
 void CllrfFwAdapt::setAverageWindow(double *window)
 {
+    double  sum = 0.;
     int16_t window_out[MAX_SAMPLES];
+ 
+    for(int i = 0; i < MAX_SAMPLES; i++) sum += *(window + i);
 
     for(int i = 0; i < MAX_SAMPLES; i++) {
-        window_out[i] = (int16_t)(*(window + i) * 0x7fff);
+        window_out[i] = (int16_t)((*(window + i) / sum) * 0x7fff);
     }
 
     CPSW_TRY_CATCH(avg_window_->setVal((uint16_t*) window_out, MAX_SAMPLES));
