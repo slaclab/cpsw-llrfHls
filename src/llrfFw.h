@@ -5,6 +5,7 @@
 #include <cpsw_api_builder.h>
 
 #define NUM_CH       30
+#define NUM_FB_CH    10
 #define NUM_WINDOW   3
 #define NUM_TIMESLOT 18
 #define NUM_FB_LOOPS 18
