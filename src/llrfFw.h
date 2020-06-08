@@ -27,6 +27,9 @@ public:
     virtual void getCounter(uint32_t *counter) = 0;
     virtual void getDropCounter(uint32_t *dropCounter) = 0;
 
+    virtual void setStreamEnable(bool enable) = 0;
+    virtual void setModeConfig(uint32_t mode) = 0;
+
     virtual void setPhaseReferenceOffset(double phase) = 0;
     virtual void setPhaseFeedbackOffset(double phase) = 0;
     virtual void setPhaseGain(double gain) = 0;
