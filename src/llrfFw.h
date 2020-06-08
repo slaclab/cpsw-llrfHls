@@ -4,7 +4,8 @@
 #include <cpsw_api_user.h>
 #include <cpsw_api_builder.h>
 
-#define NUM_CH       10
+#define NUM_CH       30
+#define NUM_WINDOW   3
 #define NUM_TIMESLOT 18
 #define NUM_FB_LOOPS 18
 
@@ -16,6 +17,14 @@ typedef shared_ptr<IllrfFw> llrfFw;
 class IllrfFw : public virtual IEntry {
 public:
     static llrfFw create(Path p);
+
+    virtual void getVersion(uint32_t *version) = 0;
+    virtual void getNumTimeslot(uint32_t *num) = 0;
+    virtual void getNumChannel(uint32_t *num) = 0;
+    virtual void getNumWindow(uint32_t *num) = 0;
+    virtual void getMaxPulseLength(uint32_t *len) = 0;
+    virtual void getCounter(uint32_t *counter) = 0;
+    virtual void getDropCounter(uint32_t *dropCounter) = 0;
 
     virtual void setPhaseReferenceOffset(double phase) = 0;
     virtual void setPhaseFeedbackOffset(double phase) = 0;
@@ -45,7 +54,7 @@ public:
     virtual void getPhaseSetAllTimeslots(double *phase) = 0;
     virtual void getAmplSetAllTimeslots(double *ampl) = 0;
 
-    virtual void setAverageWindow(double *window) = 0;
+    virtual void setAverageWindow(double *window, int window_idx) = 0;
     virtual void getIWaveform(double *i_waveform, int channel) = 0;
     virtual void getQWaveform(double *q_waveform, int channel) = 0;
 };

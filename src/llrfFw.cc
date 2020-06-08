@@ -33,8 +33,20 @@ private:
 protected:
     Path pLlrfFeedbackWrapper_;
     Path pLlrfHls_;
-    Path pFeedbackWindow_;
+//    Path pFeedbackWindow_;
     Path pIQWaveform_;
+
+    /* system configuration */
+    ScalVal_RO version_;                  // llrfHls firmware version
+    ScalVal_RO num_timeslot_;             // number of timeslot
+    ScalVal_RO num_channel_;              // number of channels
+    ScalVal_RO num_window_;               // number of average window
+    ScalVal_RO max_pulseLength_;          // max pulse length
+    /* diagnostics */
+    ScalVal_RO counter_;                  // llrfHls loop counter
+    ScalVal_RO drop_counter_;             // stream drop counter
+    /* stream control */
+    ScalVal    stream_enable_;
 
     /* put ScalVals, etc. here */
     DoubleVal p_ref_offset_;              // phase offset for reference
@@ -68,12 +80,23 @@ protected:
     DoubleVal_RO p_set_;                  // phase set value for each timeslot, array[18]
     DoubleVal_RO a_set_;                  // ampliktude set value for each timeslot, array[18]
 
-    ScalVal   avg_window_;                // average window
+    ScalVal   avg_window_[NUM_WINDOW];                // average window
     ScalVal_RO   i_waveform_ch_[NUM_CH];     // i waveform for each channel
     ScalVal_RO   q_waveform_ch_[NUM_CH];     // q waveform for each channel 
 
 public:
     CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie);
+
+    virtual void getVersion(uint32_t *version);
+    virtual void getNumTimeslot(uint32_t *num);
+    virtual void getNumChannel(uint32_t *num);
+    virtual void getNumWindow(uint32_t *num);
+    virtual void getMaxPulseLength(uint32_t *len);
+    virtual void getCounter(uint32_t *counter);
+    virtual void getDropCounter(uint32_t *dropCounter);
+
+    virtual void setStreamEnable(bool enable);
+
 
     virtual void setPhaseReferenceOffset(double phase);
     virtual void setPhaseFeedbackOffset(double phase);
@@ -105,7 +128,7 @@ public:
     virtual void getPhaseSetAllTimeslots(double *phase);
     virtual void getAmplSetAllTimeslots(double *ampl);
 
-    virtual void setAverageWindow(double *window);
+    virtual void setAverageWindow(double *window, int window_idx);
     virtual void getIWaveform(double *i_waveform, int channel);
     virtual void getQWaveform(double *q_waveform, int channel);
     
@@ -123,8 +146,17 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     IEntryAdapt(k, p, ie),
     pLlrfFeedbackWrapper_(p->findByName("")),
     pLlrfHls_(       pLlrfFeedbackWrapper_->findByName("LlrfHls")),
-    pFeedbackWindow_(pLlrfFeedbackWrapper_->findByName("FeedbackWindow")),
     pIQWaveform_(    pLlrfFeedbackWrapper_->findByName("IQWaveform")),
+
+    version_(         IScalVal_RO::create(pLlrfHls_->findByName("VERSION_V"))),
+    num_timeslot_(    IScalVal_RO::create(pLlrfHls_->findByName("NUM_TIMESLOT_V"))),
+    num_channel_(     IScalVal_RO::create(pLlrfHls_->findByName("NUM_CHANNELS_V"))),
+    num_window_(      IScalVal_RO::create(pLlrfHls_->findByName("NUM_WINDOW_V"))),
+    max_pulseLength_( IScalVal_RO::create(pLlrfHls_->findByName("MAX_PULSE_LEN_V"))),
+    counter_(         IScalVal_RO::create(pLlrfHls_->findByName("COUNTER_V"))),
+    drop_counter_(    IScalVal_RO::create(pLlrfHls_->findByName("DROP_COUNTER_V"))),
+
+    stream_enable_(   IScalVal::create(pLlrfHls_->findByName("STREAM_ENABLE"))),
 
     p_ref_offset_(   IDoubleVal::create(pLlrfHls_->findByName("P_REF_OFFSET"))),
     p_fb_offset_(    IDoubleVal::create(pLlrfHls_->findByName("P_FB_OFFSET"))),
@@ -155,9 +187,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     a_ref_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_REF"))),   // array[18], get all of timeslot data at once
 
     p_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("P_SET"))),   // array[18], get all of timeslot data at once
-    a_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_SET"))),   // array[18], get all of timeslot data at once
-
-    avg_window_(            IScalVal::create(pFeedbackWindow_->findByName("Window")))  // array[4096], average window
+    a_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_SET")))    // array[18], get all of timeslot data at once
 
 {
     char str_name[80];
@@ -175,8 +205,51 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
         sprintf(str_name, "P_DES[%d]", i); p_des_[i] = IDoubleVal::create(pLlrfHls_->findByName(str_name));
         sprintf(str_name, "A_DES[%d]", i); a_des_[i] = IDoubleVal::create(pLlrfHls_->findByName(str_name));
     }    
+
+    for(int i = 0; i < NUM_WINDOW; i++) {
+        sprintf(str_name, "FeedbackWindow[%d]/Window", i); avg_window_[i] = IScalVal::create(pLlrfFeedbackWrapper_->findByName(str_name));
+    }
 }
 
+void CllrfFwAdapt::getVersion(uint32_t *version)
+{
+    CPSW_TRY_CATCH(version_->getVal(version));
+}
+
+void CllrfFwAdapt::getNumTimeslot(uint32_t *num)
+{
+    CPSW_TRY_CATCH(num_timeslot_->getVal(num));
+}
+
+void CllrfFwAdapt::getNumChannel(uint32_t *num)
+{
+    CPSW_TRY_CATCH(num_channel_->getVal(num));
+}
+
+void CllrfFwAdapt::getNumWindow(uint32_t *num)
+{
+    CPSW_TRY_CATCH(num_window_->getVal(num));
+}
+
+void CllrfFwAdapt::getMaxPulseLength(uint32_t *len)
+{
+    CPSW_TRY_CATCH(max_pulseLength_->getVal(len));
+}
+
+void CllrfFwAdapt::getCounter(uint32_t *counter)
+{
+    CPSW_TRY_CATCH(counter_->getVal(counter));
+}
+
+void CllrfFwAdapt::getDropCounter(uint32_t *dropCounter)
+{
+    CPSW_TRY_CATCH(drop_counter_->getVal(dropCounter));
+}
+
+void CllrfFwAdapt::setStreamEnable(bool enable)
+{
+    CPSW_TRY_CATCH(stream_enable_->setVal(enable?1:0));
+}
 
 void CllrfFwAdapt::setPhaseReferenceOffset(double phase)
 {
@@ -361,7 +434,7 @@ void CllrfFwAdapt::getAmplSetAllTimeslots(double *ampl)
 }
 
 
-void CllrfFwAdapt::setAverageWindow(double *window)
+void CllrfFwAdapt::setAverageWindow(double *window, int window_idx)
 {
     double  sum = 0.;
     int16_t window_out[MAX_SAMPLES];
@@ -374,7 +447,7 @@ void CllrfFwAdapt::setAverageWindow(double *window)
         window_out[i] = (int16_t)((*(window + i) / sum) * 0x7fff);
     }
 
-    CPSW_TRY_CATCH(avg_window_->setVal((uint16_t*) window_out, MAX_SAMPLES));
+    CPSW_TRY_CATCH(avg_window_[window_idx]->setVal((uint16_t*) window_out, MAX_SAMPLES));
 }
 
 
