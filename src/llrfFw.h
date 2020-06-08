@@ -46,8 +46,8 @@ public:
     virtual void setDesiredPhase(double phase, int timeslot) = 0;
     virtual void setDesiredAmpl(double ampl, int timeslot) = 0;
 
-    virtual void getPhaseAllChannels(double *phase) = 0;
-    virtual void getAmplAllChannels(double *ampl) = 0;
+    virtual void getPhaseAllChannels(double *phase) = 0;              // get phase for 30 channels
+    virtual void getAmplAllChannels(double *ampl) = 0;                // get amplitude for 30 channels
     virtual void getFeedbackPhaseAllTimeslots(double *phase) = 0;
     virtual void getFeedbackAmplAllTimeslots(double *ampl) = 0;
     virtual void getReferencePhaseAllTimeslots(double *phase) = 0;

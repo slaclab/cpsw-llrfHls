@@ -27,8 +27,8 @@ typedef shared_ptr<CllrfFwAdapt> llrfFwAdapt;
 
 class CllrfFwAdapt : public IllrfFw, public IEntryAdapt {
 private:
-    double ref_weight_input[NUM_CH], ref_weight_norm[NUM_CH];
-    double fb_weight_input[NUM_CH],  fb_weight_norm[NUM_CH];
+    double ref_weight_input[NUM_FB_CH], ref_weight_norm[NUM_FB_CH];
+    double fb_weight_input[NUM_FB_CH],  fb_weight_norm[NUM_FB_CH];
 
 protected:
     Path pLlrfFeedbackWrapper_;
@@ -66,12 +66,12 @@ protected:
     DoubleVal a_drv_lower_;               // lower drive limit for amplitude
     DoubleVal ref_weight_;                // channel weight for reference average, for each channel, array[10]
     DoubleVal fb_weight_;                 // channel weight for feedback average, for each channel, array[10]
-    DoubleVal p_offset_[NUM_CH];                  // phase offset for each channel, array[10]
+    DoubleVal p_offset_[NUM_FB_CH];                     // phase offset for each channel, array[10]
     DoubleVal p_des_[NUM_TIMESLOT];                     // desired phase, PDES, for each timeslot, array[18]
     DoubleVal a_des_[NUM_TIMESLOT];                     // desired amplitude, ADES, for each timeslot, array[18]
 
-    DoubleVal_RO p_ch_;                      // window averaged phase for each channel, array[10]
-    DoubleVal_RO a_ch_;                      // window averaged amplitude for each channel, array[10]
+    DoubleVal_RO p_ch_;                      // window averaged phase for each channel, array[30]
+    DoubleVal_RO a_ch_;                      // window averaged amplitude for each channel, array[30]
     DoubleVal_RO p_fb_;                      // channel averaged phase for each timeslot, array[18]
     DoubleVal_RO a_fb_;                      // channel averaged amplitude for each timeslot, array[18]
     DoubleVal_RO p_ref_;                     // channel averaged phase for reference, for each timeslot, array[18]
@@ -81,8 +81,8 @@ protected:
     DoubleVal_RO a_set_;                  // ampliktude set value for each timeslot, array[18]
 
     ScalVal   avg_window_[NUM_WINDOW];                // average window
-    ScalVal_RO   i_waveform_ch_[NUM_CH];     // i waveform for each channel
-    ScalVal_RO   q_waveform_ch_[NUM_CH];     // q waveform for each channel 
+    ScalVal_RO   i_waveform_ch_[NUM_FB_CH];     // i waveform for each channel
+    ScalVal_RO   q_waveform_ch_[NUM_FB_CH];     // q waveform for each channel 
 
 public:
     CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie);
@@ -192,7 +192,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
 {
     char str_name[80];
 
-    for(int i = 0; i < NUM_CH; i++) {
+    for(int i = 0; i < NUM_FB_CH; i++) {
         sprintf(str_name, "P_OFFSET[%d]",   i);           p_offset_[i]      = IDoubleVal::create(pLlrfHls_->findByName(str_name));
         sprintf(str_name, "IQWaveform[%d]/waveformI", i); i_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
         sprintf(str_name, "IQWaveform[%d]/waveformQ", i); q_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
@@ -329,16 +329,16 @@ void CllrfFwAdapt::setReferenceChannelWeight(double weight, int channel)
 
     ref_weight_input[channel] = weight;
 
-    for(int i = 0; i < NUM_CH; i++) {
+    for(int i = 0; i < NUM_FB_CH; i++) {
         sum += ref_weight_input[i];
     }
     if(sum <0.) return;
 
-    for(int i = 0; i < NUM_CH; i++) {
+    for(int i = 0; i < NUM_FB_CH; i++) {
         ref_weight_norm[i] = ref_weight_input[i] / sum;
     }
 
-    CPSW_TRY_CATCH(ref_weight_->setVal(ref_weight_norm, NUM_CH));
+    CPSW_TRY_CATCH(ref_weight_->setVal(ref_weight_norm, NUM_FB_CH));
 }
 
 void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel)
@@ -347,16 +347,16 @@ void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel)
 
     fb_weight_input[channel] = weight;
 
-    for(int i = 0; i < NUM_CH; i++) {
+    for(int i = 0; i < NUM_FB_CH; i++) {
         sum += fb_weight_input[i];
     }
     if(sum < 0.) return;
 
-    for(int i = 0; i < NUM_CH; i++) {
+    for(int i = 0; i < NUM_FB_CH; i++) {
         fb_weight_norm[i] = fb_weight_input[i] / sum;
     }
 
-    CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_CH));
+    CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_FB_CH));
 }
 
 void CllrfFwAdapt::setPhaseOffset(double offset, int channel)
@@ -376,7 +376,7 @@ void CllrfFwAdapt::setDesiredAmpl(double ampl, int timeslot)
     CPSW_TRY_CATCH(a_des_[timeslot]->setVal(ampl));
 }
 
-void CllrfFwAdapt::getPhaseAllChannels(double *phase)
+void CllrfFwAdapt::getPhaseAllChannels(double *phase)    // get phase for 30 channels
 {
     CPSW_TRY_CATCH(p_ch_->getVal(phase, NUM_CH));
 
@@ -385,7 +385,7 @@ void CllrfFwAdapt::getPhaseAllChannels(double *phase)
     }
 }
 
-void CllrfFwAdapt::getAmplAllChannels(double *ampl)
+void CllrfFwAdapt::getAmplAllChannels(double *ampl)     // get amplitude for 30 channels
 {
     CPSW_TRY_CATCH(a_ch_->getVal(ampl, NUM_CH));
 }
