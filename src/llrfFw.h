@@ -29,6 +29,7 @@ public:
 
     virtual void setStreamEnable(bool enable) = 0;
     virtual void setModeConfig(uint32_t mode) = 0;
+    virtual void freezeWaveform(bool freeze) = 0;
 
     virtual void setPhaseReferenceOffset(double phase) = 0;
     virtual void setPhaseFeedbackOffset(double phase) = 0;

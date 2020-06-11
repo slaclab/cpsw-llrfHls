@@ -48,6 +48,7 @@ protected:
     /* stream control */
     ScalVal    stream_enable_;            // sream enable:1, disable: 0
     ScalVal    mode_config_;              // trigger mode, disable:0, accel: 1, stdby: 2, accel_or_stdby: 3
+    ScalVal    freeze_wf_;                // freeze iq waveform reading
 
     /* put ScalVals, etc. here */
     DoubleVal p_ref_offset_;              // phase offset for reference
@@ -98,6 +99,7 @@ public:
 
     virtual void setStreamEnable(bool enable);
     virtual void setModeConfig(uint32_t mode);
+    virtual void freezeWaveform(bool freeze);
 
 
     virtual void setPhaseReferenceOffset(double phase);
@@ -159,7 +161,8 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     drop_counter_(    IScalVal_RO::create(pLlrfHls_->findByName("DROP_COUNTER_V"))),
 
     stream_enable_(   IScalVal::create(pLlrfHls_->findByName("STREAM_ENABLE"))),
-    mode_config_(     IScalVal::create(pLlrfHls_->findByName("MODE_CONFIG_V"))),
+    mode_config_(     IScalVal::create(pLlrfFeedbackWrapper_->findByName("MODE_CONFIG"))),
+    freeze_wf_(       IScalVal::create(pLlrfFeedbackWrapper_->findByName("FREEZE_SW_WF"))),
 
     p_ref_offset_(   IDoubleVal::create(pLlrfHls_->findByName("P_REF_OFFSET"))),
     p_fb_offset_(    IDoubleVal::create(pLlrfHls_->findByName("P_FB_OFFSET"))),
@@ -257,6 +260,11 @@ void CllrfFwAdapt::setStreamEnable(bool enable)
 void CllrfFwAdapt::setModeConfig(uint32_t mode)
 {
     CPSW_TRY_CATCH(mode_config_->setVal(mode));
+}
+
+void CllrfFwAdapt::freezeWaveform(bool freeze)
+{
+    CPSW_TRY_CATCH(freeze_wf_->setVal(freeze?1: 0));
 }
 
 void CllrfFwAdapt::setPhaseReferenceOffset(double phase)
