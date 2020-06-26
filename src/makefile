@@ -12,6 +12,7 @@ INSTALL_DIR=../
 HEADERS += llrfFw.h
 
 llrfHls_SRCS  = llrfFw.cc
+llrfHls_SRCS  += interlockRtmFw.cc
 llrfHls_LIBS  = $(CPSW_LIBS)
 
 SHARED_LIBRARIES_YES+=llrfHls
