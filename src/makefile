@@ -10,6 +10,7 @@ include $(CPSW_DIR)/defs.mak
 INSTALL_DIR=../
 
 HEADERS += llrfFw.h
+HEADERS += interlockRtmFw.h
 
 llrfHls_SRCS  = llrfFw.cc
 llrfHls_SRCS  += interlockRtmFw.cc
