@@ -1,4 +1,7 @@
-R2.0.0    June 28, 2002  Kukhee Kim (khkim)
+R2.1.0    June 30, 2020   Kukhee Kim (khkim)
+                 - add complex average window to support PCAV application
+
+R2.0.0    June 28, 2020   Kukhee Kim (khkim)
                  - add interlock RTM API
 R1.1.0    June 7, 2020   Kukhee Kim (khkim)
                  - add new registers
