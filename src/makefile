@@ -11,6 +11,7 @@ INSTALL_DIR=../
 
 HEADERS += llrfFw.h
 HEADERS += interlockRtmFw.h
+HEADERS += dacSigGenFw.h
 
 llrfHls_SRCS  = llrfFw.cc
 llrfHls_SRCS  += interlockRtmFw.cc
