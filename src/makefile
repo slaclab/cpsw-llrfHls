@@ -14,6 +14,7 @@ HEADERS += interlockRtmFw.h
 
 llrfHls_SRCS  = llrfFw.cc
 llrfHls_SRCS  += interlockRtmFw.cc
+llrfHls_SRCS  += dacSigGenFw.cc
 llrfHls_LIBS  = $(CPSW_LIBS)
 
 SHARED_LIBRARIES_YES+=llrfHls
