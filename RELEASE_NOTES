@@ -1,3 +1,6 @@
+R2.2.0    July 23, 2020   Kukhee Kim (khkim)
+                 - add DacSigGen for baseband I&Q waveform
+
 R2.1.0    June 30, 2020   Kukhee Kim (khkim)
                  - add complex average window to support PCAV application
 

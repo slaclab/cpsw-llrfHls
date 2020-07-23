@@ -15,8 +15,8 @@ class IdacSigGenFw : public virtual IEntry {
 public:
     static dacSigGenFw create(Path p);
 
-//    virtual void setIWaveform(double *i_waveform) = 0;
-//    virtual void setQWaveform(double *q_waveform) = 0;
+    virtual void setIWaveform(double *i_waveform) = 0;
+    virtual void setQWaveform(double *q_waveform) = 0;
 };
 
 
