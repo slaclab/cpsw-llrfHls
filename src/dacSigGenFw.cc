@@ -67,7 +67,7 @@ CdacSigGenFwAdapt::CdacSigGenFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntr
     v = 0x03; CPSW_TRY_CATCH(enableMask_->setVal(v));    // enable two waveforms I and Q
     v = 0x00; CPSW_TRY_CATCH(modeMask_->setVal(v));      // triggered mode
     v = 0x00; CPSW_TRY_CATCH(signFormat_->setVal(v));    // signed 2's complementary data type
-    CPSW_TRY_CATCH(periodSize_->setVal(MAX_SAMPLES));    // length of IQ table
+    CPSW_TRY_CATCH(periodSize_->setVal(MAX_SAMPLES-1));    // length of IQ table
     
 }
 
@@ -87,5 +87,5 @@ void CdacSigGenFwAdapt::setQWaveform(double *q_waveform)
         q_wf_out[i] =(int16_t)(*(q_waveform +i) * 0x7fff);
     }
 
-    CPSW_TRY_CATCH(i_waveform_->setVal((uint16_t *)q_wf_out,MAX_SAMPLES));
+    CPSW_TRY_CATCH(q_waveform_->setVal((uint16_t *)q_wf_out,MAX_SAMPLES));
 }
