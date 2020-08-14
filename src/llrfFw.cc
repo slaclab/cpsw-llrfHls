@@ -60,6 +60,7 @@ protected:
     ScalVal_RO drop_counter_;             // stream drop counter
     /* stream control */
     ScalVal    stream_enable_;            // sream enable:1, disable: 0
+    ScalVal    disable_timeslot_;         // disable timeslot feedback
     ScalVal    mode_config_;              // trigger mode, disable:0, accel: 1, stdby: 2, accel_or_stdby: 3
     ScalVal    freeze_wf_;                // freeze iq waveform reading
 
@@ -113,6 +114,7 @@ public:
     virtual void getDropCounter(uint32_t *dropCounter);
 
     virtual void setStreamEnable(bool enable);
+    virtual void setTimeslotFeedback(bool enable);
     virtual void setModeConfig(uint32_t mode);
     virtual void freezeWaveform(bool freeze);
 
@@ -178,6 +180,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     drop_counter_(    IScalVal_RO::create(pLlrfHls_->findByName("DROP_COUNTER_V"))),
 
     stream_enable_(   IScalVal::create(pLlrfHls_->findByName("STREAM_ENABLE"))),
+    disable_timeslot_(IScalVal::create(pLlrfHls_->findByName("DISABLE_TIMESLOT_FEEDBACK"))),
     mode_config_(     IScalVal::create(pLlrfFeedbackWrapper_->findByName("MODE_CONFIG"))),
     freeze_wf_(       IScalVal::create(pLlrfFeedbackWrapper_->findByName("FREEZE_SW_WF"))),
 
@@ -287,6 +290,11 @@ void CllrfFwAdapt::getDropCounter(uint32_t *dropCounter)
 void CllrfFwAdapt::setStreamEnable(bool enable)
 {
     CPSW_TRY_CATCH(stream_enable_->setVal(enable?1:0));
+}
+
+void CllrfFwAdapt::setTimeslotFeedback(bool enable)
+{
+    CPSW_TRY_CATCH(disable_timeslot_->setVal(enable?0:1));
 }
 
 void CllrfFwAdapt::setModeConfig(uint32_t mode)

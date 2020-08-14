@@ -28,6 +28,7 @@ public:
     virtual void getDropCounter(uint32_t *dropCounter) = 0;
 
     virtual void setStreamEnable(bool enable) = 0;
+    virtual void setTimeslotFeedback(bool enable) = 0;
     virtual void setModeConfig(uint32_t mode) = 0;
     virtual void freezeWaveform(bool freeze) = 0;
 
