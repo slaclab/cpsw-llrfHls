@@ -42,6 +42,7 @@ private:
     } wnd[NUM_WINDOW];
 
     double norm(double i[], double q[]);
+    void   updateComplexWindow(int window_idx);
 
 protected:
     Path pLlrfFeedbackWrapper_;
@@ -97,10 +98,9 @@ protected:
     DoubleVal_RO a_set_;                  // ampliktude set value for each timeslot, array[18]
 
     ScalVal      avg_window_[NUM_WINDOW];                // average window
-    ScalVal      i_waveform_avgWnd_[NUM_WINDOW];        // complex average window : i
-    ScalVal      q_waveform_avgWnd_[NUM_WINDOW];        // complex average window : q
-    ScalVal_RO   i_waveform_ch_[NUM_FB_CH];     // i waveform for each channel
-    ScalVal_RO   q_waveform_ch_[NUM_FB_CH];     // q waveform for each channel 
+    ScalVal      complex_window_[NUM_WINDOW];           // complex window, combinded i and q
+
+    ScalVal_RO   iq_waveform_ch_[NUM_FB_CH];     // combined i and q waveform for each channel
 
 public:
     CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie);
@@ -152,8 +152,7 @@ public:
     virtual void setAverageWindow(double *window, int window_idx);
     virtual void setIWaveformAverageWindow(double *i_waveform, int window_idx);
     virtual void setQWaveformAverageWindow(double *q_waveform, int window_idx);
-    virtual void getIWaveform(double *i_waveform, int channel);
-    virtual void getQWaveform(double *q_waveform, int channel);
+    virtual void getIQWaveform(double *i_waveform, double *q_waveform, int channel);
     
 
 };
@@ -220,8 +219,8 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
 
     for(int i = 0; i < NUM_FB_CH; i++) {
         sprintf(str_name, "P_OFFSET[%d]",   i);           p_offset_[i]      = IDoubleVal::create(pLlrfHls_->findByName(str_name));
-        sprintf(str_name, "IQWaveform[%d]/waveformI", i); i_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
-        sprintf(str_name, "IQWaveform[%d]/waveformQ", i); q_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
+        sprintf(str_name, "IQWaveform[%d]/waveformIQ", i); iq_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
+
 
         ref_weight_input[i] = ref_weight_norm[i] = 0.;    // intitialize the referecne channel weight
         fb_weight_input[i]  = fb_weight_norm[i]  = 0.;    // iniitialize the feeedback channel weight
@@ -235,8 +234,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     for(int i = 0; i < NUM_WINDOW; i++) {
         if(ComplexAvgWindow) {    /* complex average window */
             valid_cAvgWnd = true;   /* the complex average window is valid */
-            sprintf(str_name, "FeedbackWindow[%d]/waveformI", i); i_waveform_avgWnd_[i] = IScalVal::create(pLlrfFeedbackWrapper_->findByName(str_name));
-            sprintf(str_name, "FeedbackWindow[%d]/waveformQ", i); q_waveform_avgWnd_[i] = IScalVal::create(pLlrfFeedbackWrapper_->findByName(str_name));
+            sprintf(str_name, "FeedbackWindow[%d]/waveformIQ", i); complex_window_[i] = IScalVal::create(pLlrfFeedbackWrapper_->findByName(str_name));
         } else {   /* non complex average window */
             valid_cAvgWnd = false; /* the complex average window is invalid */
             sprintf(str_name, "FeedbackWindow[%d]/Window", i); avg_window_[i] = IScalVal::create(pLlrfFeedbackWrapper_->findByName(str_name));
@@ -518,6 +516,28 @@ double CllrfFwAdapt::norm(double i[], double q[])
     return sum;
 }
 
+void CllrfFwAdapt::updateComplexWindow(int window_idx)
+{
+
+    double n = norm(wnd[window_idx].i, wnd[window_idx].q);
+    if(n < 1.) n = 1.;
+
+    union {
+        struct {
+            int16_t i;
+            int16_t q;
+        }        d16d16[MAX_SAMPLES];
+        uint32_t d32[MAX_SAMPLES];
+    } wf;    
+
+    for(int i = 0; i < MAX_SAMPLES; i++) {
+        wf.d16d16[i].i = (int16_t)((wnd[window_idx].i[i] / n) * 0x7fff);
+        wf.d16d16[i].q = (int16_t)((wnd[window_idx].q[i] / n) * 0x7fff);
+    }
+
+    CPSW_TRY_CATCH(complex_window_[window_idx]->setVal(wf.d32, MAX_SAMPLES));
+
+}
 
 void CllrfFwAdapt::setIWaveformAverageWindow(double *i_waveform, int window_idx)
 {
@@ -525,18 +545,7 @@ void CllrfFwAdapt::setIWaveformAverageWindow(double *i_waveform, int window_idx)
 
     for(int i = 0; i < MAX_SAMPLES; i++) wnd[window_idx].i[i] = *(i_waveform + i);
 
-    double n = norm(wnd[window_idx].i, wnd[window_idx].q);
-    if(n < 1.) n = 1.;
-
-    int16_t window_i_out[MAX_SAMPLES], window_q_out[MAX_SAMPLES];
-
-    for(int i = 0; i < MAX_SAMPLES; i++) {
-        window_i_out[i] = (int16_t)((wnd[window_idx].i[i] / n) * 0x7fff);
-        window_q_out[i] = (int16_t)((wnd[window_idx].q[i] / n) * 0x7fff);
-    }
-
-    CPSW_TRY_CATCH(i_waveform_avgWnd_[window_idx]->setVal((uint16_t *) window_i_out, MAX_SAMPLES));
-    CPSW_TRY_CATCH(q_waveform_avgWnd_[window_idx]->setVal((uint16_t *) window_q_out, MAX_SAMPLES));
+    updateComplexWindow(window_idx);
 }
 
 void CllrfFwAdapt::setQWaveformAverageWindow(double *q_waveform, int window_idx)
@@ -545,39 +554,29 @@ void CllrfFwAdapt::setQWaveformAverageWindow(double *q_waveform, int window_idx)
 
     for(int i = 0; i < MAX_SAMPLES; i++) wnd[window_idx].q[i] = *(q_waveform + i);
 
-    double n = norm(wnd[window_idx].i, wnd[window_idx].q);
-    if(n < 1.) n = 1.;
-
-    int16_t window_i_out[MAX_SAMPLES], window_q_out[MAX_SAMPLES];
-
-    for(int i = 0; i < MAX_SAMPLES; i++) {
-        window_i_out[i] = (int16_t)((wnd[window_idx].i[i] / n) * 0x7fff);
-        window_q_out[i] = (int16_t)((wnd[window_idx].q[i] / n) * 0x7fff);
-    }
-
-    CPSW_TRY_CATCH(i_waveform_avgWnd_[window_idx]->setVal((uint16_t *) window_i_out, MAX_SAMPLES));
-    CPSW_TRY_CATCH(q_waveform_avgWnd_[window_idx]->setVal((uint16_t *) window_q_out, MAX_SAMPLES));
+    updateComplexWindow(window_idx);
 
 }
 
 
-void CllrfFwAdapt::getIWaveform(double *i_waveform, int channel)
+
+void CllrfFwAdapt::getIQWaveform(double *i_waveform, double *q_waveform, int channel)
 {
-    int16_t waveform[MAX_SAMPLES];
-    CPSW_TRY_CATCH(i_waveform_ch_[channel]->getVal((uint16_t*)waveform, MAX_SAMPLES));
+    union {
+        struct {
+            int16_t i;
+            int16_t q;
+        }        d16d16[MAX_SAMPLES];
+        uint32_t d32[MAX_SAMPLES];
+    } wf;
+
+    CPSW_TRY_CATCH(iq_waveform_ch_[channel]->getVal(wf.d32, MAX_SAMPLES));
 
     for(int i = 0; i < MAX_SAMPLES; i++) {
-        *(i_waveform + i) = (double)(waveform[i])/(double)(0x7fff);
+        *(i_waveform + i) = (double)(wf.d16d16[i].i) / (double)(0x7fff);
+        *(q_waveform + i) = (double)(wf.d16d16[i].q) / (double)(0x7fff);
     }
 }
 
-void CllrfFwAdapt::getQWaveform(double *q_waveform, int channel)
-{
-    int16_t waveform[MAX_SAMPLES];
-    CPSW_TRY_CATCH(q_waveform_ch_[channel]->getVal((uint16_t*)waveform, MAX_SAMPLES));
 
 
-    for(int i = 0; i < MAX_SAMPLES; i++) {
-        *(q_waveform +i) = (double)(waveform[i])/(double) (0x7fff);
-    }
-}

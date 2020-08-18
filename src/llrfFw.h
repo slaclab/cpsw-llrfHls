@@ -63,8 +63,9 @@ public:
     virtual void setAverageWindow(double *window, int window_idx) = 0;
     virtual void setIWaveformAverageWindow(double *i_waveform, int window_idx) = 0;
     virtual void setQWaveformAverageWindow(double *q_waveform, int window_idx) = 0;
-    virtual void getIWaveform(double *i_waveform, int channel) = 0;
-    virtual void getQWaveform(double *q_waveform, int channel) = 0;
+    // virtual void getIWaveform(double *i_waveform, int channel) = 0;
+    // virtual void getQWaveform(double *q_waveform, int channel) = 0;
+    virtual void getIQWaveform(double *i_waveform, double *q_waveform, int channel) = 0;
 };
 
 
