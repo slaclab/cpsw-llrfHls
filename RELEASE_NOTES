@@ -1,3 +1,6 @@
+R3.0.0    Aug  21, 2020  Kukhee Kim (khkim)
+                 - support firmware-1d3a2ea : RTM history buffer improvement
+
 R2.3.0    Aug 14, 2020    Kukhee Kim (khkim)
                  - add enable/disable timeslot feedback
                  - merge 2 of 16bit array registers to 1 of 32bit array register for complex window and IQ waveforms

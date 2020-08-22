@@ -41,6 +41,13 @@ protected:
     Command      rtmSwTrigger_Cmd_;
     Command      rtmClearFault_Cmd_;
 
+    ScalVal      rtmFaultStreamEnable_;
+    ScalVal_RO   rtmFaultBufferWritePointer_;
+    ScalVal_RO   rtmFaultTimeStampBuffer_;
+    ScalVal_RO   rtmAdcHistoryBufferBeamIV_;
+    ScalVal_RO   rtmAdcHistoryBufferFwdRef_;
+
+
 public:
     CinterlockRtmFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie);
 
@@ -69,6 +76,9 @@ public:
     virtual void cmdRtmRearm(void);
     virtual void cmdRtmSwTrigger(void);
     virtual void cmdRtmClearFault(void);
+
+    virtual void setFaultStreamEnable(uint32_t v);
+    virtual void getFaultHistoryBuffer(uint32_t *writePointer, uint32_t timestamp[], uint32_t histIV[], uint32_t histFwdRef[]);
 };
 
 
@@ -109,7 +119,13 @@ CinterlockRtmFwAdapt::CinterlockRtmFwAdapt(Key &k, ConstPath p, shared_ptr<const
   rtmAdcBufferFwdRef_(   IScalVal_RO::create(pCore_->findByName("RtmRfInterlock/RtmAdcBuffer[1]/MemoryArray") ) ),
   rtmRearm_Cmd_(         ICommand::create(pCore_->findByName("RtmRfInterlock/RearmTrigger") ) ),
   rtmSwTrigger_Cmd_(     ICommand::create(pCore_->findByName("RtmRfInterlock/SwTrigger") ) ),
-  rtmClearFault_Cmd_(    ICommand::create(pCore_->findByName("RtmRfInterlock/ClearFault") ) )
+  rtmClearFault_Cmd_(    ICommand::create(pCore_->findByName("RtmRfInterlock/ClearFault") ) ),
+
+  rtmFaultStreamEnable_(      IScalVal   ::create(pCore_->findByName("RtmRfInterlock/StreamEnable") ) ),
+  rtmFaultBufferWritePointer_(IScalVal_RO::create(pCore_->findByName("RtmRfInterlock/WritePointer") ) ),
+  rtmFaultTimeStampBuffer_   (IScalVal_RO::create(pCore_->findByName("RtmRfInterlock/timestampBuffer") ) ),
+  rtmAdcHistoryBufferBeamIV_( IScalVal_RO::create(pCore_->findByName("RtmRfInterlock/RtmAdcHistoryBuffer[0]/MemoryArray") ) ),
+  rtmAdcHistoryBufferFwdRef_( IScalVal_RO::create(pCore_->findByName("RtmRfInterlock/RtmAdcHistoryBuffer[1]/MemoryArray") ) )
 {
 }
 
@@ -418,6 +434,29 @@ void CinterlockRtmFwAdapt::cmdRtmClearFault(void)
     }
 }
 
+void CinterlockRtmFwAdapt::setFaultStreamEnable(uint32_t v)
+{
+    try {
+        rtmFaultStreamEnable_->setVal((v)?1:0);
+    } catch (CPSWError &e) {
+        fprintf(stderr,"CPSW Error: %s\n", e.getInfo().c_str());
+        throw e;
+    }
+}
+
+
+void CinterlockRtmFwAdapt::getFaultHistoryBuffer(uint32_t *writePointer, uint32_t timestamp[], uint32_t histIV[], uint32_t histFwdRef[])
+{
+    try {
+        rtmFaultBufferWritePointer_->getVal(writePointer, 0x1);
+        rtmFaultTimeStampBuffer_->getVal(timestamp, 0x8);
+        rtmAdcHistoryBufferBeamIV_->getVal(histIV, 0x800);
+        rtmAdcHistoryBufferFwdRef_->getVal(histFwdRef, 0x800);
+    } catch (CPSWError &e) {
+        fprintf(stderr,"CPSW Error: %s\n", e.getInfo().c_str());
+        throw e;
+    }
+}
 
 
 

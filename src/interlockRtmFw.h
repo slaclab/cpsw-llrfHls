@@ -37,6 +37,9 @@ public:
     virtual void cmdRtmSwTrigger(void) = 0;
     virtual void cmdRtmClearFault(void) = 0;
 
+    virtual void setFaultStreamEnable(uint32_t v) = 0;
+    virtual void getFaultHistoryBuffer(uint32_t *writePointer, uint32_t timestamp[], uint32_t histIV[], uint32_t histFwdRef[]) = 0;
+
 };
 
 
