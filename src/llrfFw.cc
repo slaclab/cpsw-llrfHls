@@ -97,6 +97,20 @@ protected:
     DoubleVal_RO p_set_;                  // phase set value for each timeslot, array[18]
     DoubleVal_RO a_set_;                  // ampliktude set value for each timeslot, array[18]
 
+
+    // amplitude conversion, configuration
+    DoubleVal    a_conv_coeff_[NUM_FB_CH];   // amplitude conversion coefficient per channel array[10];
+    DoubleVal    a_norm_;                    // normalization factor for aset value
+    // jitter calculation (variance), configuration
+    DoubleVal    var_gain_;                  // gain for variance and mean calculation (single pole algorithm)
+    // jitter calculation readout
+    DoubleVal_RO var_p_fb_;                  // variance for phase, timeslot aware, array[18]
+    DoubleVal_RO var_a_fb_;                  // variance for amplitude, timeslot aware, array[18]
+    DoubleVal_RO var_bv_;                    // variance for beam voltage, timeslot aware, array[18]
+    DoubleVal_RO mean_p_fb_;                 // average for phase, timeslot aware, array[18]
+    DoubleVal_RO mean_a_fb_;                 // average for amplitude, timeslot aware, array[18]
+    DoubleVal_RO mean_bv_;                   // average for beam voltage, timeslot aware, array[18]
+
     ScalVal      avg_window_[NUM_WINDOW];                // average window
     ScalVal      complex_window_[NUM_WINDOW];           // complex window, combinded i and q
 
@@ -153,7 +167,16 @@ public:
     virtual void setIWaveformAverageWindow(double *i_waveform, int window_idx);
     virtual void setQWaveformAverageWindow(double *q_waveform, int window_idx);
     virtual void getIQWaveform(double *i_waveform, double *q_waveform, int channel);
-    
+
+    virtual void setAmplCoeff(double coeff, int channel);
+    virtual void setAmplNorm(double norm);
+    virtual void setVarGain(double gain);
+    virtual void getVarPhaseAllTimeslots(double *var);
+    virtual void getVarAmplAllTimeslots(double *var);
+    virtual void getVarBeamVoltageAllTimeslots(double *var);
+    virtual void getAvgPhaseAllTimeslots(double *avg);
+    virtual void getAvgAmplAllTimeslots(double *avg);
+    virtual void getAvgBeamVoltageAllTimeslots(double *avg);    
 
 };
 
@@ -212,7 +235,18 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     a_ref_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_REF"))),   // array[18], get all of timeslot data at once
 
     p_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("P_SET"))),   // array[18], get all of timeslot data at once
-    a_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_SET")))    // array[18], get all of timeslot data at once
+    a_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_SET"))),   // array[18], get all of timeslot data at once
+
+    // a_conv_coeff_    // make multiple instaces in function body, 10 instances
+    a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),           // array[18], get all of timeslot data at once
+    var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),         // array[18], get all of timeslot data at once
+    var_p_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_P_FB"))),      // array[18], get all of timeslot data at once
+    var_a_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_A_FB"))),      // array[18], get all of timeslot data at once
+    var_bv_(                IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_BV"))),        // array[18], get all of timeslot data at once
+    mean_p_fb_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_P_FB"))),     // array[18], get all of timeslot data at once
+    mean_a_fb_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_A_FB"))),     // array[18], get all of timeslot data at once
+    mean_bv_(               IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_BV")))        // array[18], get all of timeslot data at once
+
 
 {
     char str_name[80];
@@ -220,6 +254,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     for(int i = 0; i < NUM_FB_CH; i++) {
         sprintf(str_name, "P_OFFSET[%d]",   i);           p_offset_[i]      = IDoubleVal::create(pLlrfHls_->findByName(str_name));
         sprintf(str_name, "IQWaveform[%d]/waveformIQ", i); iq_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
+        sprintf(str_name, "A_CONV_COEFF[%d]", i);          a_conv_coeff_[i] = IDoubleVal::create(pLlrfHls_->findByName(str_name));
 
 
         ref_weight_input[i] = ref_weight_norm[i] = 0.;    // intitialize the referecne channel weight
@@ -579,4 +614,50 @@ void CllrfFwAdapt::getIQWaveform(double *i_waveform, double *q_waveform, int cha
 }
 
 
+
+
+void CllrfFwAdapt::setAmplCoeff(double coeff, int channel)
+{
+    CPSW_TRY_CATCH(a_conv_coeff_[channel]->setVal(coeff));
+}
+
+void CllrfFwAdapt::setAmplNorm(double norm)
+{
+    CPSW_TRY_CATCH(a_norm_->setVal(norm));
+}
+
+void CllrfFwAdapt::setVarGain(double gain)
+{
+    CPSW_TRY_CATCH(var_gain_->setVal(gain));
+}
+
+void CllrfFwAdapt::getVarPhaseAllTimeslots(double *var)
+{
+    CPSW_TRY_CATCH(var_p_fb_->getVal(var, NUM_TIMESLOT));
+}
+
+void CllrfFwAdapt::getVarAmplAllTimeslots(double *var)
+{
+    CPSW_TRY_CATCH(var_a_fb_->getVal(var, NUM_TIMESLOT));
+}
+
+void CllrfFwAdapt::getVarBeamVoltageAllTimeslots(double *var)
+{
+    CPSW_TRY_CATCH(var_bv_->getVal(var, NUM_TIMESLOT));
+}
+
+void CllrfFwAdapt::getAvgPhaseAllTimeslots(double *avg)
+{
+    CPSW_TRY_CATCH(mean_p_fb_->getVal(avg, NUM_TIMESLOT));
+}
+
+void CllrfFwAdapt::getAvgAmplAllTimeslots(double *avg)
+{
+    CPSW_TRY_CATCH(mean_a_fb_->getVal(avg, NUM_TIMESLOT));
+}
+
+void CllrfFwAdapt::getAvgBeamVoltageAllTimeslots(double *avg)
+{
+    CPSW_TRY_CATCH(mean_bv_->getVal(avg, NUM_TIMESLOT));
+}
 

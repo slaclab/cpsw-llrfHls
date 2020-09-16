@@ -66,6 +66,16 @@ public:
     // virtual void getIWaveform(double *i_waveform, int channel) = 0;
     // virtual void getQWaveform(double *q_waveform, int channel) = 0;
     virtual void getIQWaveform(double *i_waveform, double *q_waveform, int channel) = 0;
+
+    virtual void setAmplCoeff(double coeff, int channel) = 0;
+    virtual void setAmplNorm(double norm) = 0;
+    virtual void setVarGain(double gain) = 0;
+    virtual void getVarPhaseAllTimeslots(double *var) = 0;
+    virtual void getVarAmplAllTimeslots(double *var) = 0;
+    virtual void getVarBeamVoltageAllTimeslots(double *var) = 0;
+    virtual void getAvgPhaseAllTimeslots(double *avg) = 0;
+    virtual void getAvgAmplAllTimeslots(double *avg) = 0;
+    virtual void getAvgBeamVoltageAllTimeslots(double *avg) = 0;
 };
 
 

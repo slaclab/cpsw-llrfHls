@@ -1,3 +1,6 @@
+R3.1.0    Sep 15, 2020  Kukhee Kim (khkim)
+                 - support new firmware: firmware based jitter calculation and amplitude conversion
+
 R3.0.0    Aug 25, 2020  Kukhee Kim (khkim)
                  - support firmware based RTM history buffers
 
