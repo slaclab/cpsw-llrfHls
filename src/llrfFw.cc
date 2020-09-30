@@ -116,6 +116,25 @@ protected:
 
     ScalVal_RO   iq_waveform_ch_[NUM_FB_CH];     // combined i and q waveform for each channel
 
+
+    // for adaptive feedback
+    // configuration
+    ScalVal      op_mode_;                   // operation, backward comptible vs. adaptive feedback
+    DoubleVal    p_adaptive_gain_;           // phase feedback gain for adaptive mode
+    DoubleVal    a_adaptive_gain_;           // amplitude feedback gain for adaptive mode
+    DoubleVal    p_distb_gain_;              // disturbance gain for phase
+    DoubleVal    a_distb_gain_;              // distrubance gain for amplitude
+    DoubleVal    harmo_cs1_;                 // cos vector for 1st harmonics
+    DoubleVal    harmo_sn1_;                 // sin vector for 1st harmonics
+    DoubleVal    harmo_cs2_;                 // cos vector for 2nd harmonics
+    DoubleVal    harmo_sn2_;                 // sin vector for 2nd harmnics
+    DoubleVal    harmo_cs3_;                 // cos vector for 3rd harmonics
+    DoubleVal    harmo_sn3_;                 // sin vector for 3rd harmonics
+    // status
+    DoubleVal_RO    p_alpha_;                   // alpha vector phase
+    DoubleVal_RO    a_alpha_;                   // alpha vector for amplitude
+
+
 public:
     CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie);
 
@@ -178,6 +197,16 @@ public:
     virtual void getAvgAmplAllTimeslots(double *avg);
     virtual void getAvgBeamVoltageAllTimeslots(double *avg);    
 
+    virtual void setOpMode(bool mode);
+    virtual void setPhaseAdaptiveGain(double gain);
+    virtual void setAmplAdaptiveGain(double gain);
+    virtual void setPhaseDistbGain(double gain);
+    virtual void setAmplDistbGain(double gain);
+    virtual void setHarmonicsCs(double *cs, int order);
+    virtual void setHarmonicsSn(double *sn, int order);
+
+    virtual void getPhaseAlpha(double *alpha);
+    virtual void getAmplAlpha(double *alpha);
 };
 
 
@@ -245,7 +274,23 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     var_bv_(                IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_BV"))),        // array[18], get all of timeslot data at once
     mean_p_fb_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_P_FB"))),     // array[18], get all of timeslot data at once
     mean_a_fb_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_A_FB"))),     // array[18], get all of timeslot data at once
-    mean_bv_(               IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_BV")))        // array[18], get all of timeslot data at once
+    mean_bv_(               IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_BV"))),       // array[18], get all of timeslot data at once
+
+    // adaptive mode, configuration
+    op_mode_(               IScalVal::create(pLlrfHls_->findByName("OP_MODE"))),
+    p_adaptive_gain_(       IDoubleVal::create(pLlrfHls_->findByName("P_ADAPTIVE_GAIN"))),
+    a_adaptive_gain_(       IDoubleVal::create(pLlrfHls_->findByName("A_ADAPTIVE_GAIN"))),
+    p_distb_gain_(          IDoubleVal::create(pLlrfHls_->findByName("P_DISTB_GAIN"))),
+    a_distb_gain_(          IDoubleVal::create(pLlrfHls_->findByName("A_DISTB_GAIN"))),
+    harmo_cs1_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS1"))),      // array[18]
+    harmo_sn1_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS1"))),      // array[18]
+    harmo_cs2_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS2"))),      // araay[18]
+    harmo_sn2_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_SN2"))),      // array[18]
+    harmo_cs3_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS3"))),      // array[18]
+    harmo_sn3_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_SN3"))),      // array[18]
+    // adaptive mode, status
+    p_alpha_(               IDoubleVal_RO::create(pLlrfHls_->findByName("P_ALPHA"))),      // array[7]
+    a_alpha_(               IDoubleVal_RO::create(pLlrfHls_->findByName("A_ALPHA")))       // array[7]
 
 
 {
@@ -661,3 +706,68 @@ void CllrfFwAdapt::getAvgBeamVoltageAllTimeslots(double *avg)
     CPSW_TRY_CATCH(mean_bv_->getVal(avg, NUM_TIMESLOT));
 }
 
+
+void CllrfFwAdapt::setOpMode(bool mode)
+{
+    CPSW_TRY_CATCH(op_mode_->setVal(mode?1:0));
+}
+
+void CllrfFwAdapt::setPhaseAdaptiveGain(double gain)
+{
+    CPSW_TRY_CATCH(p_adaptive_gain_->setVal(gain));
+}
+
+void CllrfFwAdapt::setAmplAdaptiveGain(double gain)
+{
+    CPSW_TRY_CATCH(a_adaptive_gain_->setVal(gain));
+}
+
+void CllrfFwAdapt::setPhaseDistbGain(double gain)
+{
+    CPSW_TRY_CATCH(p_distb_gain_->setVal(gain));
+}
+
+void CllrfFwAdapt::setAmplDistbGain(double gain)
+{
+    CPSW_TRY_CATCH(a_distb_gain_->setVal(gain));
+}
+
+void CllrfFwAdapt::setHarmonicsCs(double *cs, int order)
+{
+    switch(order) {
+        case 1:
+            CPSW_TRY_CATCH(harmo_cs1_->setVal(cs, NUM_TIMESLOT));
+            break;
+        case 2:
+            CPSW_TRY_CATCH(harmo_cs2_->setVal(cs, NUM_TIMESLOT));
+            break;
+        case 3:
+            CPSW_TRY_CATCH(harmo_cs3_->setVal(cs, NUM_TIMESLOT));
+            break;
+    }
+}
+
+void CllrfFwAdapt::setHarmonicsSn(double *sn, int order)
+{
+    switch(order) {
+        case 1:
+            CPSW_TRY_CATCH(harmo_sn1_->setVal(sn, NUM_TIMESLOT));
+            break;
+        case 2:
+            CPSW_TRY_CATCH(harmo_sn2_->setVal(sn, NUM_TIMESLOT));
+            break;
+        case 3:
+            CPSW_TRY_CATCH(harmo_sn3_->setVal(sn, NUM_TIMESLOT));
+            break;
+    }
+}
+
+void CllrfFwAdapt::getPhaseAlpha(double *alpha)
+{
+    CPSW_TRY_CATCH(p_alpha_->getVal(alpha, ALPHA_DIM));
+}
+
+void CllrfFwAdapt::getAmplAlpha(double *alpha)
+{
+    CPSW_TRY_CATCH(a_alpha_->getVal(alpha, ALPHA_DIM));
+}

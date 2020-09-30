@@ -12,6 +12,16 @@
 
 #define MAX_SAMPLES  4096
 
+
+#define NUM_HARMONICS          3
+#define HARMONICS_DIX_CS(X)    ((X) * NUM_HARMONICS)
+#define HARMONICS_IDX_SN(X)    ((X) * NUM_HARMONICS + 1)
+#define ALPHA_DIM              (NUM_HARMONICS*2 + 1)
+#define ALPHA_HARMO            (ALPHA_DIM -1)
+#define ALPHA_IDX_DC           (ALPHA_DIM -1)
+
+
+
 class IllrfFw;
 typedef shared_ptr<IllrfFw> llrfFw;
 
@@ -76,6 +86,17 @@ public:
     virtual void getAvgPhaseAllTimeslots(double *avg) = 0;
     virtual void getAvgAmplAllTimeslots(double *avg) = 0;
     virtual void getAvgBeamVoltageAllTimeslots(double *avg) = 0;
+
+    virtual void setOpMode(bool mode) = 0;
+    virtual void setPhaseAdaptiveGain(double gain) = 0;
+    virtual void setAmplAdaptiveGain(double gain) = 0;
+    virtual void setPhaseDistbGain(double gain) = 0;
+    virtual void setAmplDistbGain(double gain) = 0;
+    virtual void setHarmonicsCs(double *cs, int order) = 0;
+    virtual void setHarmonicsSn(double *sn, int order) = 0;
+
+    virtual void getPhaseAlpha(double *alpha) = 0;
+    virtual void getAmplAlpha(double *alpha) = 0;
 };
 
 
