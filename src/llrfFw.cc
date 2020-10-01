@@ -283,7 +283,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     p_distb_gain_(          IDoubleVal::create(pLlrfHls_->findByName("P_DISTB_GAIN"))),
     a_distb_gain_(          IDoubleVal::create(pLlrfHls_->findByName("A_DISTB_GAIN"))),
     harmo_cs1_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS1"))),      // array[18]
-    harmo_sn1_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS1"))),      // array[18]
+    harmo_sn1_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_SN1"))),      // array[18]
     harmo_cs2_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS2"))),      // araay[18]
     harmo_sn2_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_SN2"))),      // array[18]
     harmo_cs3_(             IDoubleVal::create(pLlrfHls_->findByName("HARMO_CS3"))),      // array[18]
