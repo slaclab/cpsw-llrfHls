@@ -87,6 +87,11 @@ public:
     virtual void getAvgAmplAllTimeslots(double *avg) = 0;
     virtual void getAvgBeamVoltageAllTimeslots(double *avg) = 0;
 
+    virtual void getVarPhaseAllChannels(double *var) = 0;
+    virtual void getVarAmplAllChannels(double *var) = 0;
+    virtual void getAvgPhaseAllChannels(double *var) = 0;
+    virtual void getAvgAmplAllChannels(double *var) = 0;
+
     virtual void setOpMode(bool mode) = 0;
     virtual void setPhaseAdaptiveGain(double gain) = 0;
     virtual void setAmplAdaptiveGain(double gain) = 0;

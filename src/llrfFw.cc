@@ -111,6 +111,11 @@ protected:
     DoubleVal_RO mean_a_fb_;                 // average for amplitude, timeslot aware, array[18]
     DoubleVal_RO mean_bv_;                   // average for beam voltage, timeslot aware, array[18]
 
+    DoubleVal_RO var_p_ch_;                   // variance for phase, each channel and each each average window, array[30]
+    DoubleVal_RO var_a_ch_;                   // variance for amplitude, each channel and each average window, array[30]
+    DoubleVal_RO mean_p_ch_;                  // average for phase, each channel and each average window, array[30]
+    DoubleVal_RO mean_a_ch_;                  // average for amplitude, each channel and each average window, array[30]
+
     ScalVal      avg_window_[NUM_WINDOW];                // average window
     ScalVal      complex_window_[NUM_WINDOW];           // complex window, combinded i and q
 
@@ -197,6 +202,11 @@ public:
     virtual void getAvgAmplAllTimeslots(double *avg);
     virtual void getAvgBeamVoltageAllTimeslots(double *avg);    
 
+    virtual void getVarPhaseAllChannels(double *var);
+    virtual void getVarAmplAllChannels(double *var);
+    virtual void getAvgPhaseAllChannels(double *var);
+    virtual void getAvgAmplAllChannels(double *var);
+
     virtual void setOpMode(bool mode);
     virtual void setPhaseAdaptiveGain(double gain);
     virtual void setAmplAdaptiveGain(double gain);
@@ -275,6 +285,11 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     mean_p_fb_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_P_FB"))),     // array[18], get all of timeslot data at once
     mean_a_fb_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_A_FB"))),     // array[18], get all of timeslot data at once
     mean_bv_(               IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_BV"))),       // array[18], get all of timeslot data at once
+
+    var_p_ch_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_P_CH"))),      //array[3][10]
+    var_a_ch_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_A_CH"))),      //array[3][10]
+    mean_p_ch_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_P_CH"))),     //array[3][10]
+    mean_a_ch_(             IDoubleVal_RO::create(pLlrfHls_->findByName("MEAN_A_CH"))),     //array[3][10]
 
     // adaptive mode, configuration
     op_mode_(               IScalVal::create(pLlrfHls_->findByName("OP_MODE"))),
@@ -704,6 +719,25 @@ void CllrfFwAdapt::getAvgAmplAllTimeslots(double *avg)
 void CllrfFwAdapt::getAvgBeamVoltageAllTimeslots(double *avg)
 {
     CPSW_TRY_CATCH(mean_bv_->getVal(avg, NUM_TIMESLOT));
+}
+
+void CllrfFwAdapt::getVarPhaseAllChannels(double *var)
+{
+    CPSW_TRY_CATCH(var_p_ch_->getVal(var, NUM_CH));
+}
+void CllrfFwAdapt::getVarAmplAllChannels(double *var)
+{
+    CPSW_TRY_CATCH(var_a_ch_->getVal(var, NUM_CH));
+}
+
+void CllrfFwAdapt::getAvgPhaseAllChannels(double *avg)
+{
+    CPSW_TRY_CATCH(mean_p_ch_->getVal(avg, NUM_CH));
+}
+
+void CllrfFwAdapt::getAvgAmplAllChannels(double *avg)
+{
+    CPSW_TRY_CATCH(mean_a_ch_->getVal(avg, NUM_CH));
 }
 
 
