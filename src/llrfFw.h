@@ -53,6 +53,7 @@ public:
     virtual void setPhaseCorrectionLowerLimit(double limit) = 0;
     virtual void setAmplCorrectionUpperLimit(double limit) = 0;
     virtual void setAmplCorrectionLowerLimit(double limit) = 0;
+    virtual void setAmplThreshold(double threshold) = 0;
     virtual void setAmplDriveUpperLimit(double limit) = 0;
     virtual void setAmplDriveLowerLimit(double limit) = 0;
     virtual void setReferenceChannelWeight(double weight, int channel) = 0;

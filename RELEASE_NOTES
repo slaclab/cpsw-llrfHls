@@ -1,3 +1,6 @@
+R4.1.1    Oct  8, 2020  Kukhee Kim (khkim)
+                 - add amplitude threshold for amplitude feedback
+
 R4.1.0    Oct  5, 2020  Kukhee Kim (khkim)
                  - add rms/mean calculation for each channel and average windows
 

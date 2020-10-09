@@ -79,6 +79,7 @@ protected:
     DoubleVal p_corr_lower_;              // lower lomit for phase correction
     DoubleVal a_corr_upper_;              // upper limit for amplitude correction
     DoubleVal a_corr_lower_;              // lower limit for amplitude correction
+    DoubleVal a_threshold_;               // amplitude threshold
     DoubleVal a_drv_upper_;               // upper drive limit for amplitude
     DoubleVal a_drv_lower_;               // lower drive limit for amplitude
     DoubleVal ref_weight_;                // channel weight for reference average, for each channel, array[10]
@@ -170,6 +171,7 @@ public:
     virtual void setPhaseCorrectionLowerLimit(double limit);
     virtual void setAmplCorrectionUpperLimit(double limit);
     virtual void setAmplCorrectionLowerLimit(double limit);
+    virtual void setAmplThreshold(double threshold);
     virtual void setAmplDriveUpperLimit(double limit);
     virtual void setAmplDriveLowerLimit(double limit);
     virtual void setReferenceChannelWeight(double weight, int channel);
@@ -258,6 +260,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     p_corr_lower_(          IDoubleVal::create(pLlrfHls_->findByName("P_CORR_LOWER"))),
     a_corr_upper_(          IDoubleVal::create(pLlrfHls_->findByName("A_CORR_UPPER"))),
     a_corr_lower_(          IDoubleVal::create(pLlrfHls_->findByName("A_CORR_LOWER"))),
+    a_threshold_(           IDoubleVal::create(pLlrfHls_->findByName("A_THRESHOLD"))),
     a_drv_upper_(           IDoubleVal::create(pLlrfHls_->findByName("A_DRV_UPPER"))),
     a_drv_lower_(           IDoubleVal::create(pLlrfHls_->findByName("A_DRV_LOWER"))),
     ref_weight_(            IDoubleVal::create(pLlrfHls_->findByName("REF_WEIGHT_IN"))),  
@@ -460,6 +463,11 @@ void CllrfFwAdapt::setAmplCorrectionUpperLimit(double limit)
 void CllrfFwAdapt::setAmplCorrectionLowerLimit(double limit)
 {
     CPSW_TRY_CATCH(a_corr_lower_->setVal(limit));
+}
+
+void CllrfFwAdapt::setAmplThreshold(double threshold)
+{
+    CPSW_TRY_CATCH(a_threshold_->setVal(threshold));
 }
 
 void CllrfFwAdapt::setAmplDriveUpperLimit(double limit)
