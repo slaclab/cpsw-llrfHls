@@ -171,7 +171,7 @@ public:
     virtual void setPhaseCorrectionLowerLimit(double limit);
     virtual void setAmplCorrectionUpperLimit(double limit);
     virtual void setAmplCorrectionLowerLimit(double limit);
-    virtual void setAmplThreshold(double threshold);
+    virtual void setAmplThreshold(double thred);
     virtual void setAmplDriveUpperLimit(double limit);
     virtual void setAmplDriveLowerLimit(double limit);
     virtual void setReferenceChannelWeight(double weight, int channel);
@@ -465,9 +465,9 @@ void CllrfFwAdapt::setAmplCorrectionLowerLimit(double limit)
     CPSW_TRY_CATCH(a_corr_lower_->setVal(limit));
 }
 
-void CllrfFwAdapt::setAmplThreshold(double threshold)
+void CllrfFwAdapt::setAmplThreshold(double thred)
 {
-    CPSW_TRY_CATCH(a_threshold_->setVal(threshold));
+    CPSW_TRY_CATCH(a_threshold_->setVal(thred));
 }
 
 void CllrfFwAdapt::setAmplDriveUpperLimit(double limit)
