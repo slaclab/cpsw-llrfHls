@@ -81,6 +81,7 @@ public:
     virtual void setAmplCoeff(double coeff, int channel) = 0;
     virtual void setAmplNorm(double norm) = 0;
     virtual void setVarGain(double gain) = 0;
+    virtual void setVarNtGain(double gain) = 0;
     virtual void getVarPhaseAllTimeslots(double *var) = 0;
     virtual void getVarAmplAllTimeslots(double *var) = 0;
     virtual void getVarBeamVoltageAllTimeslots(double *var) = 0;

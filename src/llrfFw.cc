@@ -104,6 +104,7 @@ protected:
     DoubleVal    a_norm_;                    // normalization factor for aset value
     // jitter calculation (variance), configuration
     DoubleVal    var_gain_;                  // gain for variance and mean calculation (single pole algorithm)
+    DoubleVal    var_gain_nt_;               // gain for variance and mean calculation for non-timeslot aware variables
     // jitter calculation readout
     DoubleVal_RO var_p_fb_;                  // variance for phase, timeslot aware, array[18]
     DoubleVal_RO var_a_fb_;                  // variance for amplitude, timeslot aware, array[18]
@@ -197,6 +198,7 @@ public:
     virtual void setAmplCoeff(double coeff, int channel);
     virtual void setAmplNorm(double norm);
     virtual void setVarGain(double gain);
+    virtual void setVarNtGain(double gain);
     virtual void getVarPhaseAllTimeslots(double *var);
     virtual void getVarAmplAllTimeslots(double *var);
     virtual void getVarBeamVoltageAllTimeslots(double *var);
@@ -280,8 +282,9 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     a_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_SET"))),   // array[18], get all of timeslot data at once
 
     // a_conv_coeff_    // make multiple instaces in function body, 10 instances
-    a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),           // array[18], get all of timeslot data at once
-    var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),         // array[18], get all of timeslot data at once
+    a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),
+    var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),
+    var_gain_nt_(           IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN_NT"))),
     var_p_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_P_FB"))),      // array[18], get all of timeslot data at once
     var_a_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_A_FB"))),      // array[18], get all of timeslot data at once
     var_bv_(                IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_BV"))),        // array[18], get all of timeslot data at once
@@ -697,6 +700,11 @@ void CllrfFwAdapt::setAmplNorm(double norm)
 void CllrfFwAdapt::setVarGain(double gain)
 {
     CPSW_TRY_CATCH(var_gain_->setVal(gain));
+}
+
+void CllrfFwAdapt::setVarNtGain(double gain)
+{
+    CPSW_TRY_CATCH(var_gain_nt_->setVal(gain));
 }
 
 void CllrfFwAdapt::getVarPhaseAllTimeslots(double *var)
