@@ -660,6 +660,8 @@ void CllrfFwAdapt::readbackComplexWindow(int window_idx)
 
     CPSW_TRY_CATCH(complex_window_[window_idx]->getVal(wf.d32, MAX_SAMPLES));
 
+    // Note that here we are reading back values which is normalized, so their
+    // absolute values will be different respect to the one use to write them.
     for(int i = 0; i < MAX_SAMPLES; i++) {
         wnd[window_idx].i[i] = (double)(wf.d16d16[i].i) / (double)(0x7fff);
         wnd[window_idx].q[i] = (double)(wf.d16d16[i].q) / (double)(0x7fff);
