@@ -1,4 +1,4 @@
-
+R4.2.0    Nov 17, 2020  Jesus Vasquez (jvasquez)
                 - Implement readback of the IQ average windows waveforms.
                   New CllrfFwAdapt class public API methods: getIWaveformAverageWindow, 
                   and getQWaveformAverageWindow.
