@@ -1,3 +1,11 @@
+
+                - Implement readback of the IQ average windows waveforms.
+                  New CllrfFwAdapt class public API methods: getIWaveformAverageWindow, 
+                  and getQWaveformAverageWindow.
+                - Implement readback of the IQ baseband waveforms
+                  New CdacSigGenFwAdapt class public API methods: getIWaveform, and
+                  getQWaveform.
+
 R4.1.2    Oct  9, 2020  Kukhee Kim (khkim)
                 - add recursion gain for non-timeslot aware variance/mean calculation
 
