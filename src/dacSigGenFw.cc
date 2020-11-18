@@ -43,6 +43,8 @@ public:
 
     virtual void  setIWaveform(double *i_waveform);
     virtual void  setQWaveform(double *q_waveform);
+    virtual void  getIWaveform(double *i_waveform);
+    virtual void  getQWaveform(double *q_waveform);
 
 };
 
@@ -88,4 +90,22 @@ void CdacSigGenFwAdapt::setQWaveform(double *q_waveform)
     }
 
     CPSW_TRY_CATCH(q_waveform_->setVal((uint16_t *)q_wf_out,MAX_SAMPLES));
+}
+
+void CdacSigGenFwAdapt::getIWaveform(double *i_waveform)
+{
+    CPSW_TRY_CATCH(i_waveform_->getVal((uint16_t *)i_wf_out, MAX_SAMPLES));
+
+    for(int i = 0; i < MAX_SAMPLES; i++) {
+        *i_waveform = (double)(i_wf_out[i]) / (double)(0x7fff);
+    }
+}
+
+void CdacSigGenFwAdapt::getQWaveform(double *q_waveform)
+{
+    CPSW_TRY_CATCH(q_waveform_->getVal((uint16_t *)q_wf_out, MAX_SAMPLES));
+
+    for(int i = 0; i < MAX_SAMPLES; i++) {
+        *q_waveform++ = (double)(q_wf_out[i]) / (double)(0x7fff);
+    }
 }

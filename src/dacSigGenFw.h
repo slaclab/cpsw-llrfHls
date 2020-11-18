@@ -17,6 +17,8 @@ public:
 
     virtual void setIWaveform(double *i_waveform) = 0;
     virtual void setQWaveform(double *q_waveform) = 0;
+    virtual void getIWaveform(double *i_waveform) = 0;
+    virtual void getQWaveform(double *q_waveform) = 0;
 };
 
 
