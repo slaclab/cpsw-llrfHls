@@ -1,3 +1,7 @@
+R4.2.1    Nov 23, 2020  Kukhee Kim (khkim)
+                - add feedback status 
+                - work with firmware 9a735f9 (Nov 23, 2020) or later
+
 R4.2.0    Nov 17, 2020  Jesus Vasquez (jvasquez)
                 - Implement readback of the IQ average windows waveforms.
                   New CllrfFwAdapt class public API methods: getIWaveformAverageWindow, 

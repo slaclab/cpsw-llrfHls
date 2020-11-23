@@ -57,6 +57,9 @@ protected:
     ScalVal_RO num_channel_;              // number of channels
     ScalVal_RO num_window_;               // number of average window
     ScalVal_RO max_pulseLength_;          // max pulse length
+    /* feedback status registers */
+    ScalVal_RO p_feedback_st_;            // status of phase feedback
+    ScalVal_RO a_feedback_st_;            // status of amplitude feedback
     /* diagnostics */
     ScalVal_RO counter_;                  // llrfHls loop counter
     ScalVal_RO drop_counter_;             // stream drop counter
@@ -154,6 +157,9 @@ public:
     virtual void getCounter(uint32_t *counter);
     virtual void getDropCounter(uint32_t *dropCounter);
 
+    virtual void getPhaseFeedbackStatus(uint32_t *st);
+    virtual void getAmplFeedbackStatus(uint32_t *st);
+
     virtual void setStreamEnable(bool enable);
     virtual void setTimeslotFeedback(bool enable);
     virtual void setModeConfig(uint32_t mode);
@@ -246,6 +252,9 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     max_pulseLength_( IScalVal_RO::create(pLlrfHls_->findByName("MAX_PULSE_LEN_V"))),
     counter_(         IScalVal_RO::create(pLlrfHls_->findByName("COUNTER_V"))),
     drop_counter_(    IScalVal_RO::create(pLlrfHls_->findByName("DROP_COUNTER_V"))),
+
+    p_feedback_st_(   IScalVal_RO::create(pLlrfHls_->findByName("P_FEEDBACK_ST_V"))),
+    a_feedback_st_(   IScalVal_RO::create(pLlrfHls_->findByName("A_FEEDBACK_ST_V"))),
 
     stream_enable_(   IScalVal::create(pLlrfHls_->findByName("STREAM_ENABLE"))),
     disable_timeslot_(IScalVal::create(pLlrfHls_->findByName("DISABLE_TIMESLOT_FEEDBACK"))),
@@ -387,6 +396,16 @@ void CllrfFwAdapt::getCounter(uint32_t *counter)
 void CllrfFwAdapt::getDropCounter(uint32_t *dropCounter)
 {
     CPSW_TRY_CATCH(drop_counter_->getVal(dropCounter));
+}
+
+void CllrfFwAdapt::getPhaseFeedbackStatus(uint32_t *st)
+{
+    CPSW_TRY_CATCH(p_feedback_st_->getVal(st));
+}
+
+void CllrfFwAdapt::getAmplFeedbackStatus(uint32_t *st)
+{
+    CPSW_TRY_CATCH(a_feedback_st_->getVal(st));
 }
 
 void CllrfFwAdapt::setStreamEnable(bool enable)
