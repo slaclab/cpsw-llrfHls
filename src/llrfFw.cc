@@ -771,32 +771,32 @@ void CllrfFwAdapt::setVarNtGain(double gain)
 
 void CllrfFwAdapt::getVarPhaseAllTimeslots(double *var)
 {
-    CPSW_TRY_CATCH(var_p_fb_->getVal(var, NUM_TIMESLOT));
+    CPSW_TRY_CATCH(var_p_fb_->getVal(var, NUM_STATISTICS));
 }
 
 void CllrfFwAdapt::getVarAmplAllTimeslots(double *var)
 {
-    CPSW_TRY_CATCH(var_a_fb_->getVal(var, NUM_TIMESLOT));
+    CPSW_TRY_CATCH(var_a_fb_->getVal(var, NUM_STATISTICS));
 }
 
 void CllrfFwAdapt::getVarBeamVoltageAllTimeslots(double *var)
 {
-    CPSW_TRY_CATCH(var_bv_->getVal(var, NUM_TIMESLOT));
+    CPSW_TRY_CATCH(var_bv_->getVal(var, NUM_STATISTICS));
 }
 
 void CllrfFwAdapt::getAvgPhaseAllTimeslots(double *avg)
 {
-    CPSW_TRY_CATCH(mean_p_fb_->getVal(avg, NUM_TIMESLOT));
+    CPSW_TRY_CATCH(mean_p_fb_->getVal(avg, NUM_STATISTICS));
 }
 
 void CllrfFwAdapt::getAvgAmplAllTimeslots(double *avg)
 {
-    CPSW_TRY_CATCH(mean_a_fb_->getVal(avg, NUM_TIMESLOT));
+    CPSW_TRY_CATCH(mean_a_fb_->getVal(avg, NUM_STATISTICS));
 }
 
 void CllrfFwAdapt::getAvgBeamVoltageAllTimeslots(double *avg)
 {
-    CPSW_TRY_CATCH(mean_bv_->getVal(avg, NUM_TIMESLOT));
+    CPSW_TRY_CATCH(mean_bv_->getVal(avg, NUM_STATISTICS));
 }
 
 void CllrfFwAdapt::getVarPhaseAllChannels(double *var)

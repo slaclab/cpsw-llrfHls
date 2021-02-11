@@ -10,6 +10,9 @@
 #define NUM_TIMESLOT 18
 #define NUM_FB_LOOPS 18
 
+#define NUM_STATISTICS  (NUM_TIMESLOT + 1)
+#define NT_STATISTICS   (NUM_STATISTICS - 1)
+
 #define MAX_SAMPLES  4096
 
 
