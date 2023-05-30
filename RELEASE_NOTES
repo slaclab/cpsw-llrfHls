@@ -1,3 +1,6 @@
+R4.3.0-destination_aware      May 30, 2023    Kukhee Kim (khkim)
+                -branch out from the master (R4.3.0) to implement destination aware trigger
+
 R4.3.0    Feb 10, 2021  Kukhee Kim (khkim)
                 - stop using timeslot 0 for non-timeslot aware var and mean
                 - using additional data place for the non-timeslot aware statistics
