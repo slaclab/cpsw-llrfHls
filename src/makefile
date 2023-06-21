@@ -10,13 +10,15 @@ include $(CPSW_DIR)/defs.mak
 INSTALL_DIR=../
 
 HEADERS += llrfFw.h
+HEADERS += llrfDestnTrig.h
 HEADERS += interlockRtmFw.h
 HEADERS += dacSigGenFw.h
 
-llrfHls_SRCS  = llrfFw.cc
+llrfHls_SRCS  += llrfFw.cc
+llrfHls_SRCS  += llrfDestnTrig.cc
 llrfHls_SRCS  += interlockRtmFw.cc
 llrfHls_SRCS  += dacSigGenFw.cc
-llrfHls_LIBS  = $(CPSW_LIBS)
+llrfHls_LIBS  += $(CPSW_LIBS)
 
 SHARED_LIBRARIES_YES+=llrfHls
 STATIC_LIBRARIES_YES+=llrfHls
