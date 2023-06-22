@@ -20,6 +20,13 @@ class IllrfDestnTrig : public virtual IEntry {
 public:
     static llrfDestnTrig create(Path p);
 
+    virtual void setEnable(int index, uint32_t enable) = 0;
+    virtual void setSource(int index, uint32_t source) = 0;
+    virtual void setPolarity(int index, uint32_t polarity) = 0;
+    virtual void setDelay(int index, uint32_t delay) = 0;
+    virtual void setWidth(int index, uint32_t width) = 0;
+
+
 };
 
 
