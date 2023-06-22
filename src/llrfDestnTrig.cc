@@ -61,7 +61,9 @@ CllrfDestnTrigAdapt::CllrfDestnTrigAdapt(Key &k, ConstPath p, shared_ptr<const C
 
     for(int i=0; i<MAX_NUM_DEST; i++) {
         pDestn_st[i] = new Destn_st;
+
         sprintf(str_name, "DestnTrig[%d]", i); pDestn[i] = pAppCore->findByName(str_name);
+
         pDestn_st[i]->enable    = IScalVal::create(pDestn[i]->findByName("Enable"));
         pDestn_st[i]->source    = IScalVal::create(pDestn[i]->findByName("Source"));
         pDestn_st[i]->polarity  = IScalVal::create(pDestn[i]->findByName("Polarity"));
