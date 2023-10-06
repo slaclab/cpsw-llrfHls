@@ -64,6 +64,9 @@ public:
     virtual void setAmplDriveLowerLimit(double limit) = 0;
     virtual void setReferenceChannelWeight(double weight, int channel) = 0;
     virtual void setFeedbackChannelWeight(double weightt, int channel) = 0;
+
+    virtual void setAverageWindowPermutationIndex(int idx, int channel) = 0;
+
     virtual void setPhaseOffset(double offset, int channel) = 0;
     virtual void setDesiredPhase(double phase, int timeslot) = 0;
     virtual void setDesiredAmpl(double ampl, int timeslot) = 0;

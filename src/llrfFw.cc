@@ -88,6 +88,9 @@ protected:
     DoubleVal a_drv_lower_;               // lower drive limit for amplitude
     DoubleVal ref_weight_;                // channel weight for reference average, for each channel, array[10]
     DoubleVal fb_weight_;                 // channel weight for feedback average, for each channel, array[10]
+
+    ScalVal   permut_idx_[NUM_FB_CH];                   // permutation index for average window, for per channel, array[10]
+
     DoubleVal p_offset_[NUM_FB_CH];                     // phase offset for each channel, array[10]
     DoubleVal p_des_[NUM_TIMESLOT];                     // desired phase, PDES, for each timeslot, array[18]
     DoubleVal a_des_[NUM_TIMESLOT];                     // desired amplitude, ADES, for each timeslot, array[18]
@@ -184,6 +187,9 @@ public:
     virtual void setAmplDriveLowerLimit(double limit);
     virtual void setReferenceChannelWeight(double weight, int channel);
     virtual void setFeedbackChannelWeight(double weight, int channel);
+
+    virtual void setAverageWindowPermutationIndex(int idx, int channel);
+
     virtual void setPhaseOffset(double phase, int channel);
     virtual void setDesiredPhase(double phase, int timeslot);
     virtual void setDesiredAmpl(double ampl, int timeslot);
@@ -279,6 +285,9 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     a_drv_lower_(           IDoubleVal::create(pLlrfHls_->findByName("A_DRV_LOWER"))),
     ref_weight_(            IDoubleVal::create(pLlrfHls_->findByName("REF_WEIGHT_IN"))),  
     fb_weight_ (            IDoubleVal::create(pLlrfHls_->findByName("FB_WEIGHT_IN"))),
+
+    // permut_idx_   // make multiple instances in function body, 10 instances
+
     // p_offset_     // make multiple instances in function body, 10 instances
     // p_des_        // make multiple instances in function body, 18 instances
     // a_des_        // make multiple instances in function body, 18 instances
@@ -330,6 +339,7 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     char str_name[80];
 
     for(int i = 0; i < NUM_FB_CH; i++) {
+        sprintf(str_name, "PERMUT_IDX[%d]", i);           permut_idx_[i]    = IScalVal::create(pLlrfHls_->findByName(str_name));
         sprintf(str_name, "P_OFFSET[%d]",   i);           p_offset_[i]      = IDoubleVal::create(pLlrfHls_->findByName(str_name));
         sprintf(str_name, "IQWaveform[%d]/waveformIQ", i); iq_waveform_ch_[i] = IScalVal_RO::create(pLlrfFeedbackWrapper_->findByName(str_name));
         sprintf(str_name, "A_CONV_COEFF[%d]", i);          a_conv_coeff_[i] = IDoubleVal::create(pLlrfHls_->findByName(str_name));
@@ -539,6 +549,12 @@ void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel)
     }
 
     CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_FB_CH));
+}
+
+
+void CllrfFwAdapt::setAverageWindowPermutationIndex(int idx, int channel)
+{
+    CPSW_TRY_CATCH(permut_idx_[channel]->setVal(idx));
 }
 
 void CllrfFwAdapt::setPhaseOffset(double offset, int channel)
