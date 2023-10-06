@@ -1,3 +1,10 @@
+R4.3.0-2.0      Oct 5, 2023   Kukhee Kim (khkim)
+                - support permutation index for average window
+                - support destination aware trigger
+                - work with firmware 8a5d966
+                (remarks)  R4.3.0-2.0  suppors both permutation window and destination-aware
+                           R4.3.0-1.0  supports only destination-aware
+
 R4.3.0-destination_aware      May 30, 2023    Kukhee Kim (khkim)
                 -branch out from the master (R4.3.0) to implement destination aware trigger
                 - add features for permutation index for average windows (per channel property) 
