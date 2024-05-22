@@ -10,6 +10,9 @@
 
 #include <math.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 
 #define CPSW_TRY_CATCH(X)       try {   \
         (X);                            \
@@ -192,6 +195,7 @@ public:
     virtual void setAmplDriveLowerLimit(double limit);
     virtual void setReferenceChannelWeight(double weight, int channel);
     virtual void setFeedbackChannelWeight(double weight, int channel, int dest);
+    virtual void printFeedbackChannelWeight(void);
 
     virtual void setAverageWindowPermutationIndex(int idx, int channel);
 
@@ -538,7 +542,7 @@ void CllrfFwAdapt::setReferenceChannelWeight(double weight, int channel)
     for(int i = 0; i < NUM_FB_CH; i++) {
         sum += ref_weight_input[i];
     }
-    if(sum <0.) return;
+    if(sum < 1.E-6) return;
 
     for(int i = 0; i < NUM_FB_CH; i++) {
         ref_weight_norm[i] = ref_weight_input[i] / sum;
@@ -556,13 +560,27 @@ void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel, int dest
     for(int i = 0; i < NUM_FB_CH; i++) {
         sum += fb_weight_input[dest*NUM_FB_CH + i];
     }
-    if(sum < 0.) return;
+    if(sum < 1.E-6) return;
 
     for(int i = 0; i < NUM_FB_CH; i++) {
         fb_weight_norm[dest*NUM_FB_CH + i] = fb_weight_input[dest*NUM_FB_CH + i] / sum;
     }
 
     CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_DEST * NUM_FB_CH));
+}
+
+void CllrfFwAdapt::printFeedbackChannelWeight(void)
+{
+    printf("Destination Aware Feedback Weight\n");
+    printf("%3s %8s %8s %8s\n", "ch", "HXR", "SXR", "Spare");
+ 
+    for(int i = 0; i < NUM_FB_CH; i++) {
+        printf("%3d %8.5lf %8.5lf %8.5lf\n",
+               i,
+               fb_weight_norm[0 * NUM_FB_CH + i],
+               fb_weight_norm[1 * NUM_FB_CH + i],
+               fb_weight_norm[2 * NUM_FB_CH + i]);
+    }
 }
 
 

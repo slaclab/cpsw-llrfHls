@@ -65,6 +65,7 @@ public:
     virtual void setAmplDriveLowerLimit(double limit) = 0;
     virtual void setReferenceChannelWeight(double weight, int channel) = 0;
     virtual void setFeedbackChannelWeight(double weight,  int channel, int dest) = 0;
+    virtual void printFeedbackChannelWeight(void) = 0;
 
     virtual void setAverageWindowPermutationIndex(int idx, int channel) = 0;
 
