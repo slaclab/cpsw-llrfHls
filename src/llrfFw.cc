@@ -112,10 +112,10 @@ protected:
     // amplitude conversion, configuration
     DoubleVal    a_conv_coeff_[NUM_FB_CH];   // amplitude conversion coefficient per channel array[10];
     DoubleVal    a_norm_;                    // normalization factor for aset value
-    DoubleVal_RO a_norm_RO_;                 // normalization factor read-only
+    DoubleVal_RO a_norm_o_;                  // normalization factor out from firmware recalculation
 
     ScalVal      recal_norm_;                // on-demand control flag to recalculate ampl normalization
-    ScalVal_RO   recal_norm_RO_;             // ampl recal flag, read-only
+    ScalVal_RO   recal_norm_done_;           // done flag for recalculating of normalization from firmware
 
     // jitter calculation (variance), configuration
     DoubleVal    var_gain_;                  // gain for variance and mean calculation (single pole algorithm)
@@ -316,9 +316,9 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
 
     // a_conv_coeff_    // make multiple instaces in function body, 10 instances
     a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),
-    a_norm_RO_(             IDoubleVal_RO::create(pLlrfHls_->findByName("A_NORM_O"))),
+    a_norm_o_(              IDoubleVal_RO::create(pLlrfHls_->findByName("A_NORM_O"))),
     recal_norm_(            IScalVal::create(pLlrfHls_->findByName("RECAL_NORM"))),
-    recal_norm_RO_(         IScalVal_RO::create(pLlrfHls_->findByName("RECAL_NORM_O"))),
+    recal_norm_done_(       IScalVal_RO::create(pLlrfHls_->findByName("RECAL_NORM_DONE"))),
     var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),
     var_gain_nt_(           IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN_NT"))),
     var_p_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_P_FB"))),      // array[18], get all of timeslot data at once
@@ -809,7 +809,7 @@ void CllrfFwAdapt::setAmplNorm(double norm)
 
 void CllrfFwAdapt::getAmplNorm(double *norm)
 {
-    CPSW_TRY_CATCH(a_norm_RO_->getVal(norm));
+    CPSW_TRY_CATCH(a_norm_o_->getVal(norm));
 }
 
 void CllrfFwAdapt::setRecalNorm(bool flag)
@@ -819,7 +819,7 @@ void CllrfFwAdapt::setRecalNorm(bool flag)
 
 void CllrfFwAdapt::getRecalNorm(uint8_t *flag)
 {
-    CPSW_TRY_CATCH(recal_norm_RO_->getVal(flag));
+    CPSW_TRY_CATCH(recal_norm_done_->getVal(flag));
 }
 
 void CllrfFwAdapt::setVarGain(double gain)
