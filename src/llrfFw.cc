@@ -10,6 +10,9 @@
 
 #include <math.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 
 #define CPSW_TRY_CATCH(X)       try {   \
         (X);                            \
@@ -34,7 +37,7 @@ class CllrfFwAdapt : public IllrfFw, public IEntryAdapt {
 private:
     bool   valid_cAvgWnd;
     double ref_weight_input[NUM_FB_CH], ref_weight_norm[NUM_FB_CH];
-    double fb_weight_input[NUM_FB_CH],  fb_weight_norm[NUM_FB_CH];
+    double fb_weight_input[NUM_FB_CH * NUM_DEST],  fb_weight_norm[NUM_FB_CH * NUM_DEST];
 
     struct {
         double i[MAX_SAMPLES];
@@ -109,6 +112,11 @@ protected:
     // amplitude conversion, configuration
     DoubleVal    a_conv_coeff_[NUM_FB_CH];   // amplitude conversion coefficient per channel array[10];
     DoubleVal    a_norm_;                    // normalization factor for aset value
+    DoubleVal_RO a_norm_o_;                  // normalization factor out from firmware recalculation
+
+    ScalVal      recal_norm_;                // on-demand control flag to recalculate ampl normalization
+    ScalVal_RO   recal_norm_done_;           // done flag for recalculating of normalization from firmware
+
     // jitter calculation (variance), configuration
     DoubleVal    var_gain_;                  // gain for variance and mean calculation (single pole algorithm)
     DoubleVal    var_gain_nt_;               // gain for variance and mean calculation for non-timeslot aware variables
@@ -186,7 +194,8 @@ public:
     virtual void setAmplDriveUpperLimit(double limit);
     virtual void setAmplDriveLowerLimit(double limit);
     virtual void setReferenceChannelWeight(double weight, int channel);
-    virtual void setFeedbackChannelWeight(double weight, int channel);
+    virtual void setFeedbackChannelWeight(double weight, int channel, int dest);
+    virtual void printFeedbackChannelWeight(void);
 
     virtual void setAverageWindowPermutationIndex(int idx, int channel);
 
@@ -212,6 +221,9 @@ public:
 
     virtual void setAmplCoeff(double coeff, int channel);
     virtual void setAmplNorm(double norm);
+    virtual void getAmplNorm(double *norm);
+    virtual void setRecalNorm(bool flag);
+    virtual void getRecalNorm(uint8_t *flag);
     virtual void setVarGain(double gain);
     virtual void setVarNtGain(double gain);
     virtual void getVarPhaseAllTimeslots(double *var);
@@ -304,6 +316,9 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
 
     // a_conv_coeff_    // make multiple instaces in function body, 10 instances
     a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),
+    a_norm_o_(              IDoubleVal_RO::create(pLlrfHls_->findByName("A_NORM_O"))),
+    recal_norm_(            IScalVal::create(pLlrfHls_->findByName("RECAL_NORM"))),
+    recal_norm_done_(       IScalVal_RO::create(pLlrfHls_->findByName("RECAL_NORM_DONE"))),
     var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),
     var_gain_nt_(           IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN_NT"))),
     var_p_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_P_FB"))),      // array[18], get all of timeslot data at once
@@ -346,7 +361,10 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
 
 
         ref_weight_input[i] = ref_weight_norm[i] = 0.;    // intitialize the referecne channel weight
-        fb_weight_input[i]  = fb_weight_norm[i]  = 0.;    // iniitialize the feeedback channel weight
+
+        for(int j =0;j < NUM_DEST; j++) {
+           fb_weight_input[j*NUM_FB_CH + i]  = fb_weight_norm[j*NUM_FB_CH + i]  = 0.;    // iniitialize the feeedback channel weight
+        }
     }
 
     for(int i = 0; i < NUM_TIMESLOT; i++) {
@@ -524,7 +542,7 @@ void CllrfFwAdapt::setReferenceChannelWeight(double weight, int channel)
     for(int i = 0; i < NUM_FB_CH; i++) {
         sum += ref_weight_input[i];
     }
-    if(sum <0.) return;
+    if(sum < 1.E-6) return;
 
     for(int i = 0; i < NUM_FB_CH; i++) {
         ref_weight_norm[i] = ref_weight_input[i] / sum;
@@ -533,22 +551,36 @@ void CllrfFwAdapt::setReferenceChannelWeight(double weight, int channel)
     CPSW_TRY_CATCH(ref_weight_->setVal(ref_weight_norm, NUM_FB_CH));
 }
 
-void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel)
+void CllrfFwAdapt::setFeedbackChannelWeight(double weight, int channel, int dest)
 {
     double sum = 0.;
 
-    fb_weight_input[channel] = weight;
+    fb_weight_input[dest*NUM_FB_CH + channel] = weight;
 
     for(int i = 0; i < NUM_FB_CH; i++) {
-        sum += fb_weight_input[i];
+        sum += fb_weight_input[dest*NUM_FB_CH + i];
     }
-    if(sum < 0.) return;
+    if(sum < 1.E-6) return;
 
     for(int i = 0; i < NUM_FB_CH; i++) {
-        fb_weight_norm[i] = fb_weight_input[i] / sum;
+        fb_weight_norm[dest*NUM_FB_CH + i] = fb_weight_input[dest*NUM_FB_CH + i] / sum;
     }
 
-    CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_FB_CH));
+    CPSW_TRY_CATCH(fb_weight_->setVal(fb_weight_norm, NUM_DEST * NUM_FB_CH));
+}
+
+void CllrfFwAdapt::printFeedbackChannelWeight(void)
+{
+    printf("Destination Aware Feedback Weight\n");
+    printf("%3s %8s %8s %8s\n", "ch", "HXR", "SXR", "Spare");
+ 
+    for(int i = 0; i < NUM_FB_CH; i++) {
+        printf("%3d %8.5lf %8.5lf %8.5lf\n",
+               i,
+               fb_weight_norm[0 * NUM_FB_CH + i],
+               fb_weight_norm[1 * NUM_FB_CH + i],
+               fb_weight_norm[2 * NUM_FB_CH + i]);
+    }
 }
 
 
@@ -773,6 +805,21 @@ void CllrfFwAdapt::setAmplCoeff(double coeff, int channel)
 void CllrfFwAdapt::setAmplNorm(double norm)
 {
     CPSW_TRY_CATCH(a_norm_->setVal(norm));
+}
+
+void CllrfFwAdapt::getAmplNorm(double *norm)
+{
+    CPSW_TRY_CATCH(a_norm_o_->getVal(norm));
+}
+
+void CllrfFwAdapt::setRecalNorm(bool flag)
+{
+    CPSW_TRY_CATCH(recal_norm_->setVal(flag));
+}
+
+void CllrfFwAdapt::getRecalNorm(uint8_t *flag)
+{
+    CPSW_TRY_CATCH(recal_norm_done_->getVal(flag));
 }
 
 void CllrfFwAdapt::setVarGain(double gain)

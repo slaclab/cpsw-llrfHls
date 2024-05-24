@@ -6,6 +6,7 @@
 
 #define NUM_CH       30
 #define NUM_FB_CH    10
+#define NUM_DEST     3
 #define NUM_WINDOW   3
 #define NUM_TIMESLOT 18
 #define NUM_FB_LOOPS 18
@@ -63,7 +64,8 @@ public:
     virtual void setAmplDriveUpperLimit(double limit) = 0;
     virtual void setAmplDriveLowerLimit(double limit) = 0;
     virtual void setReferenceChannelWeight(double weight, int channel) = 0;
-    virtual void setFeedbackChannelWeight(double weightt, int channel) = 0;
+    virtual void setFeedbackChannelWeight(double weight,  int channel, int dest) = 0;
+    virtual void printFeedbackChannelWeight(void) = 0;
 
     virtual void setAverageWindowPermutationIndex(int idx, int channel) = 0;
 
@@ -91,6 +93,9 @@ public:
 
     virtual void setAmplCoeff(double coeff, int channel) = 0;
     virtual void setAmplNorm(double norm) = 0;
+    virtual void getAmplNorm(double *norm) = 0;
+    virtual void setRecalNorm(bool flag) = 0;
+    virtual void getRecalNorm(uint8_t *flag) =0;
     virtual void setVarGain(double gain) = 0;
     virtual void setVarNtGain(double gain) = 0;
     virtual void getVarPhaseAllTimeslots(double *var) = 0;
