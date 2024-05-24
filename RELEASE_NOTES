@@ -1,3 +1,10 @@
+R4.4.0          May 23, 2024 Kukhee Kim (khkim)
+                - implement destination aware feedback weight sets
+                - implement on-demand DAC normalization
+                - compatible with the following firmware version or later
+                  . NC application LlrfGen2  hash-00c9293   Built Thu 23 May 2024 09:31:33 PM PDT
+                  . SC application LlrfTcav2 hash-2e639c7   Built Thu 23 May 2024 11:01:22 PM PDT
+
 R4.3.0-2.0      Oct 5, 2023   Kukhee Kim (khkim)
                 - support permutation index for average window
                 - support destination aware trigger
