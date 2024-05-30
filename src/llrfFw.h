@@ -92,8 +92,8 @@ public:
     virtual void getIQWaveform(double *i_waveform, double *q_waveform, int channel) = 0;
 
     virtual void setAmplCoeff(double coeff, int channel) = 0;
-    virtual void setAmplNorm(double norm) = 0;
-    virtual void getAmplNorm(double *norm) = 0;
+    virtual void setAmplNorm(double norm, int dest_idx) = 0;
+    virtual void getAmplNorm(double *norm, int dest_idx) = 0;
     virtual void setRecalNorm(bool flag) = 0;
     virtual void getRecalNorm(uint8_t *flag) =0;
     virtual void setVarGain(double gain) = 0;

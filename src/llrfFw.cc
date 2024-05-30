@@ -111,8 +111,8 @@ protected:
 
     // amplitude conversion, configuration
     DoubleVal    a_conv_coeff_[NUM_FB_CH];   // amplitude conversion coefficient per channel array[10];
-    DoubleVal    a_norm_;                    // normalization factor for aset value
-    DoubleVal_RO a_norm_o_;                  // normalization factor out from firmware recalculation
+    DoubleVal    a_norm_[NUM_DEST];                    // normalization factor for aset value
+    DoubleVal_RO a_norm_o_[NUM_DEST];                  // normalization factor out from firmware recalculation
 
     ScalVal      recal_norm_;                // on-demand control flag to recalculate ampl normalization
     ScalVal_RO   recal_norm_done_;           // done flag for recalculating of normalization from firmware
@@ -220,8 +220,8 @@ public:
     virtual void getIQWaveform(double *i_waveform, double *q_waveform, int channel);
 
     virtual void setAmplCoeff(double coeff, int channel);
-    virtual void setAmplNorm(double norm);
-    virtual void getAmplNorm(double *norm);
+    virtual void setAmplNorm(double norm, int dest_idx);
+    virtual void getAmplNorm(double *norm, int dest_idx);
     virtual void setRecalNorm(bool flag);
     virtual void getRecalNorm(uint8_t *flag);
     virtual void setVarGain(double gain);
@@ -315,8 +315,9 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     a_set_(                 IDoubleVal_RO::create(pLlrfHls_->findByName("A_SET"))),   // array[18], get all of timeslot data at once
 
     // a_conv_coeff_    // make multiple instaces in function body, 10 instances
-    a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),
-    a_norm_o_(              IDoubleVal_RO::create(pLlrfHls_->findByName("A_NORM_O"))),
+    // a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),         // make multiple instances, for each destinations
+    // a_norm_o_(              IDoubleVal_RO::create(pLlrfHls_->findByName("A_NORM_O"))),    // make multiple instances, for each destinations
+
     recal_norm_(            IScalVal::create(pLlrfHls_->findByName("RECAL_NORM"))),
     recal_norm_done_(       IScalVal_RO::create(pLlrfHls_->findByName("RECAL_NORM_DONE"))),
     var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),
@@ -380,6 +381,11 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
             valid_cAvgWnd = false; /* the complex average window is invalid */
             sprintf(str_name, "FeedbackWindow[%d]/Window", i); avg_window_[i] = IScalVal::create(pLlrfFeedbackWrapper_->findByName(str_name));
        }
+    }
+
+    for(int i = 0; i < NUM_DEST; i++) {
+        sprintf(str_name, "A_NORM[%d]", i);   a_norm_[i]   = IDoubleVal::create(pLlrfHls_->findByName(str_name)); 
+        sprintf(str_name, "A_NORM_O[%d]", i); a_norm_o_[i] = IDoubleVal_RO::create(pLlrfHls_->findByName(str_name));
     }
 
     for(int w = 0; w < NUM_WINDOW; w++) {
@@ -802,14 +808,14 @@ void CllrfFwAdapt::setAmplCoeff(double coeff, int channel)
     CPSW_TRY_CATCH(a_conv_coeff_[channel]->setVal(coeff));
 }
 
-void CllrfFwAdapt::setAmplNorm(double norm)
+void CllrfFwAdapt::setAmplNorm(double norm, int dest_idx)
 {
-    CPSW_TRY_CATCH(a_norm_->setVal(norm));
+    CPSW_TRY_CATCH(a_norm_[dest_idx]->setVal(norm));
 }
 
-void CllrfFwAdapt::getAmplNorm(double *norm)
+void CllrfFwAdapt::getAmplNorm(double *norm, int dest_idx)
 {
-    CPSW_TRY_CATCH(a_norm_o_->getVal(norm));
+    CPSW_TRY_CATCH(a_norm_o_[dest_idx]->getVal(norm));
 }
 
 void CllrfFwAdapt::setRecalNorm(bool flag)
