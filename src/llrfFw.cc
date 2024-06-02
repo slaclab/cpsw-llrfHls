@@ -114,8 +114,8 @@ protected:
     DoubleVal    a_norm_[NUM_DEST];                    // normalization factor for aset value
     DoubleVal_RO a_norm_o_[NUM_DEST];                  // normalization factor out from firmware recalculation
 
-    ScalVal      recal_norm_;                // on-demand control flag to recalculate ampl normalization
-    ScalVal_RO   recal_norm_done_;           // done flag for recalculating of normalization from firmware
+    ScalVal      recal_norm_[NUM_DEST];                // on-demand control flag to recalculate ampl normalization
+    ScalVal_RO   recal_norm_done_[NUM_DEST];           // done flag for recalculating of normalization from firmware
 
     // jitter calculation (variance), configuration
     DoubleVal    var_gain_;                  // gain for variance and mean calculation (single pole algorithm)
@@ -222,8 +222,8 @@ public:
     virtual void setAmplCoeff(double coeff, int channel);
     virtual void setAmplNorm(double norm, int dest_idx);
     virtual void getAmplNorm(double *norm, int dest_idx);
-    virtual void setRecalNorm(bool flag);
-    virtual void getRecalNorm(uint8_t *flag);
+    virtual void setRecalNorm(bool flag, int dest_idx);
+    virtual void getRecalNorm(uint8_t *flag, int dest_idx);
     virtual void setVarGain(double gain);
     virtual void setVarNtGain(double gain);
     virtual void getVarPhaseAllTimeslots(double *var);
@@ -318,8 +318,8 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     // a_norm_(                IDoubleVal::create(pLlrfHls_->findByName("A_NORM"))),         // make multiple instances, for each destinations
     // a_norm_o_(              IDoubleVal_RO::create(pLlrfHls_->findByName("A_NORM_O"))),    // make multiple instances, for each destinations
 
-    recal_norm_(            IScalVal::create(pLlrfHls_->findByName("RECAL_NORM"))),
-    recal_norm_done_(       IScalVal_RO::create(pLlrfHls_->findByName("RECAL_NORM_DONE"))),
+    // recal_norm_(            IScalVal::create(pLlrfHls_->findByName("RECAL_NORM"))),          // make multiple instances, for each destinations
+    // recal_norm_done_(       IScalVal_RO::create(pLlrfHls_->findByName("RECAL_NORM_DONE"))),  // make multiple instances, for each destinations
     var_gain_(              IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN"))),
     var_gain_nt_(           IDoubleVal::create(pLlrfHls_->findByName("VAR_GAIN_NT"))),
     var_p_fb_(              IDoubleVal_RO::create(pLlrfHls_->findByName("VAR_P_FB"))),      // array[18], get all of timeslot data at once
@@ -386,6 +386,8 @@ CllrfFwAdapt::CllrfFwAdapt(Key &k, ConstPath p, shared_ptr<const CEntryImpl> ie)
     for(int i = 0; i < NUM_DEST; i++) {
         sprintf(str_name, "A_NORM[%d]", i);   a_norm_[i]   = IDoubleVal::create(pLlrfHls_->findByName(str_name)); 
         sprintf(str_name, "A_NORM_O[%d]", i); a_norm_o_[i] = IDoubleVal_RO::create(pLlrfHls_->findByName(str_name));
+        sprintf(str_name, "RECAL_NORM[%d]", i);       recal_norm_[i] = IScalVal::create(pLlrfHls_->findByName(str_name));
+        sprintf(str_name, "RECAL_NORM_DONE[%d]", i);  recal_norm_done_[i] = IScalVal_RO::create(pLlrfHls_->findByName(str_name));
     }
 
     for(int w = 0; w < NUM_WINDOW; w++) {
@@ -818,14 +820,14 @@ void CllrfFwAdapt::getAmplNorm(double *norm, int dest_idx)
     CPSW_TRY_CATCH(a_norm_o_[dest_idx]->getVal(norm));
 }
 
-void CllrfFwAdapt::setRecalNorm(bool flag)
+void CllrfFwAdapt::setRecalNorm(bool flag, int dest_idx)
 {
-    CPSW_TRY_CATCH(recal_norm_->setVal(flag));
+    CPSW_TRY_CATCH(recal_norm_[dest_idx]->setVal(flag));
 }
 
-void CllrfFwAdapt::getRecalNorm(uint8_t *flag)
+void CllrfFwAdapt::getRecalNorm(uint8_t *flag, int dest_idx)
 {
-    CPSW_TRY_CATCH(recal_norm_done_->getVal(flag));
+    CPSW_TRY_CATCH(recal_norm_done_[dest_idx]->getVal(flag));
 }
 
 void CllrfFwAdapt::setVarGain(double gain)

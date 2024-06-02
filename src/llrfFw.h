@@ -94,8 +94,8 @@ public:
     virtual void setAmplCoeff(double coeff, int channel) = 0;
     virtual void setAmplNorm(double norm, int dest_idx) = 0;
     virtual void getAmplNorm(double *norm, int dest_idx) = 0;
-    virtual void setRecalNorm(bool flag) = 0;
-    virtual void getRecalNorm(uint8_t *flag) =0;
+    virtual void setRecalNorm(bool flag, int dest_idx) = 0;
+    virtual void getRecalNorm(uint8_t *flag, int dest_idx) =0;
     virtual void setVarGain(double gain) = 0;
     virtual void setVarNtGain(double gain) = 0;
     virtual void getVarPhaseAllTimeslots(double *var) = 0;
