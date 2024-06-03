@@ -1,5 +1,7 @@
-R4.5.0          May 30, 2024 Kukhee Kim (khkim)
+
+R4.5.0          June 2, 2024 Kukhee Kim (khkim)
                 - prepare DAC normalization factors for each destination and make it work for on-demand recalculation
+                - separate DAC normalization command for each destination
 
 R4.4.0          May 23, 2024 Kukhee Kim (khkim)
                 - implement destination aware feedback weight sets
