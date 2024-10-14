@@ -15,13 +15,14 @@
 
 #define NUM_CH       30
 #define NUM_FB_CH    10
-#define NUM_DEST     3
+#define NUM_DEST     3                        // destinations,  0: HXR, 1: SXR, 2: Spare
 #define NUM_WINDOW   3
 #define NUM_TIMESLOT 18
 #define NUM_FB_LOOPS 18
 
-#define NUM_STATISTICS  (NUM_TIMESLOT + 1)
-#define NT_STATISTICS   (NUM_STATISTICS - 1)
+#define NUM_STATISTICS  (NUM_TIMESLOT + 1 + NUM_DEST)     // 18 virtual timeslots, 1 NT statistics, 3 destinations
+#define NT_STATISTICS   (NUM_STATISTICS - 1 - NUM_DEST)   // NT is located at index 18
+#define DEST_STATISTCS  (NUM_STATISTIS - NUM_DEST)        // destination statistics starts from index 19
 
 #define MAX_SAMPLES  4096
 
