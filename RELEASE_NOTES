@@ -1,3 +1,6 @@
+R4.5.0-per_destination        Oct 14, 2024 Kukhee Kim (khkim)
+                - extend timeslot to per destination
+                  22 = 18 virtual timeslots + 1 NT + 3 destinations
 
 R4.5.0          June 2, 2024 Kukhee Kim (khkim)
                 - prepare DAC normalization factors for each destination and make it work for on-demand recalculation
