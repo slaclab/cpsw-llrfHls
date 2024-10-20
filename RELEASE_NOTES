@@ -1,4 +1,4 @@
-R4.5.0-per_destination        Oct 14, 2024 Kukhee Kim (khkim)
+R4.5.0-1.0        Oct 14, 2024 Kukhee Kim (khkim)
                 - extend timeslot to per destination
                   22 = 18 virtual timeslots + 1 NT + 3 destinations
 
